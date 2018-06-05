@@ -23,8 +23,8 @@ type Client struct {
 	client     http.Client
 }
 
-// Result of query config
-type Result struct {
+// result of query config
+type result struct {
 	AppID          string            `json:"appId"`
 	Cluster        string            `json:"cluster"`
 	NamespaceName  string            `json:"namespaceName"`
@@ -130,7 +130,7 @@ func (c *Client) Query(namesapce string) (*ChangeEvent, error) {
 	if err != nil || len(bts) == 0 {
 		return nil, err
 	}
-	var result Result
+	var result result
 	if err := json.Unmarshal(bts, &result); err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (c *Client) DeliveryChangeEvent(change *ChangeEvent) {
 }
 
 // HandleResult generate changes from query result, and update local cache
-func (c *Client) HandleResult(result *Result) *ChangeEvent {
+func (c *Client) HandleResult(result *result) *ChangeEvent {
 	var ret = ChangeEvent{
 		Namespace: result.NamespaceName,
 		Changes:   map[string]*Change{},
