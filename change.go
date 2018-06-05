@@ -12,6 +12,19 @@ const (
 	DELETE
 )
 
+func (c ChangeType) String() string {
+	switch c {
+	case ADD:
+		return "ADD"
+	case MODIFY:
+		return "MODIFY"
+	case DELETE:
+		return "DELETE"
+	}
+
+	return "UNKNOW"
+}
+
 // ChangeEvent change event
 type ChangeEvent struct {
 	Namespace string

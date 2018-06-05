@@ -9,7 +9,7 @@ import (
 type Conf struct {
 	AppID          string   `json:"appId,omitempty"`
 	Cluster        string   `json:"cluster,omitempty"`
-	NameSpaceNames []string `json:"nameSpaceNames,omitempty"`
+	NameSpaceNames []string `json:"namespaceNames,omitempty"`
 	IP             string   `json:"ip,omitempty"`
 }
 

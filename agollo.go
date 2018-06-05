@@ -38,3 +38,13 @@ func Stop() error {
 func WatchUpdate() <-chan *ChangeEvent {
 	return defaultClient.WatchUpdate()
 }
+
+// GetStringValueWithNameSapce get value from given namespace
+func GetStringValueWithNameSapce(namespace, key, defaultValue string) string {
+	return defaultClient.GetStringValueWithNameSapce(namespace, key, defaultValue)
+}
+
+// GetStringValue from default namespace
+func GetStringValue(key, defaultValue string) string {
+	return defaultClient.GetStringValue(key, defaultValue)
+}
