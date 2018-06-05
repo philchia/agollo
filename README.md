@@ -1,5 +1,14 @@
 # agollo is a golang client for apollo
 
+## Feature
+
+    * Multiple namespace support
+    * Fail tolerant
+
+## Dependency
+
+    go 1.9 or later
+
 ## Installation
 
 ```sh
