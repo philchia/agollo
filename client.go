@@ -153,7 +153,9 @@ func (c *Client) request(url string) ([]byte, error) {
 
 // DeliveryChangeEvent push change to subscriber
 func (c *Client) DeliveryChangeEvent(change *ChangeEvent) {
-	c.updateChan <- change
+	select {
+	case c.updateChan <- change:
+	}
 }
 
 // HandleResult generate changes from query result, and update local cache

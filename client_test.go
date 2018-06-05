@@ -21,6 +21,7 @@ func TestStart(t *testing.T) {
 			timeout := GetStringValue("timeout", "default")
 			fmt.Println("timeout is:", timeout)
 			fmt.Println("null value is", GetStringValue("null", "null"))
+			fmt.Println("Client.json is", GetStringValueWithNameSapce("Client.json", "content", "null"))
 		}
 	}()
 	for change := range changes {
