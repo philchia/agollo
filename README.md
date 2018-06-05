@@ -4,6 +4,7 @@
 
 * Multiple namespace support
 * Fail tolerant
+* Zero dependency
 
 ## Dependency
 
