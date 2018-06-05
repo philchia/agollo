@@ -52,23 +52,24 @@ func NewClient(conf *Conf) (*Client, error) {
 // Start sync config
 func (c *Client) Start() error {
 
+	// fetch all config to local first
 	if err := c.FetchAllCinfig(); err != nil {
 		return err
 	}
 
 	go func() {
-		updates := c.longPoller.Start()
-
-		for notification := range updates {
-			change, err := c.Query(notification.NamespaceName)
-			if err != nil || change == nil {
-				continue
-			}
-			c.DeliveryChangeEvent(change)
-			c.longPoller.UpdateNotification(notification)
-		}
+		c.longPoller.Start(c.handleNamespaceUpdate)
 	}()
 	return nil
+}
+
+func (c *Client) handleNamespaceUpdate(notification *notification) {
+	change, err := c.Query(notification.NamespaceName)
+	if err != nil || change == nil {
+		return
+	}
+	c.DeliveryChangeEvent(change)
+	c.longPoller.UpdateNotification(notification)
 }
 
 // Stop sync config

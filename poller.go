@@ -11,9 +11,12 @@ import (
 // this is a static check
 var _ Poller = (*longPoller)(nil)
 
+// NotificationHandler handle namespace update notification
+type NotificationHandler func(*notification)
+
 // Poller fetch confi updates
 type Poller interface {
-	Start() <-chan *notification
+	Start(handler NotificationHandler)
 	Stop()
 	UpdateNotification(notification *notification)
 }
@@ -29,9 +32,8 @@ type longPoller struct {
 
 	client http.Client
 
-	updates chan *notification
-
 	notifications *notificatonRepo
+	handler       NotificationHandler
 }
 
 // newLongPoller create a Poller
@@ -42,7 +44,6 @@ func newLongPoller(conf *Conf, interval time.Duration) Poller {
 		ip:             conf.IP,
 		pollerInterval: interval,
 		client:         http.Client{Timeout: longPoolTimeout},
-		updates:        make(chan *notification),
 		notifications:  new(notificatonRepo),
 	}
 	for _, namespace := range conf.NameSpaceNames {
@@ -52,9 +53,9 @@ func newLongPoller(conf *Conf, interval time.Duration) Poller {
 	return poller
 }
 
-func (p *longPoller) Start() <-chan *notification {
+func (p *longPoller) Start(handler NotificationHandler) {
+	p.handler = handler
 	go p.watchUpdates()
-	return p.updates
 }
 
 func (p *longPoller) UpdateNotification(notification *notification) {
@@ -73,7 +74,7 @@ func (p *longPoller) watchUpdates() {
 		case <-tick.C:
 			if updates := p.fetch(); len(updates) > 0 {
 				for _, update := range updates {
-					p.updates <- update
+					p.handler(update)
 				}
 			}
 		case <-p.ctx.Done():
@@ -84,7 +85,6 @@ func (p *longPoller) watchUpdates() {
 
 func (p *longPoller) Stop() {
 	p.cancel()
-	close(p.updates)
 }
 
 func (p *longPoller) updateNotificationConfs(notifications []*notification) {

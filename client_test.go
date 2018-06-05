@@ -20,6 +20,7 @@ func TestStart(t *testing.T) {
 			time.Sleep(time.Second)
 			timeout := GetStringValue("timeout", "default")
 			fmt.Println("timeout is:", timeout)
+			fmt.Println("null value is", GetStringValue("null", "null"))
 		}
 	}()
 	for change := range changes {
