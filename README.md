@@ -2,12 +2,12 @@
 
 ## Feature
 
-    * Multiple namespace support
-    * Fail tolerant
+* Multiple namespace support
+* Fail tolerant
 
 ## Dependency
 
-    go 1.9 or later
+required **go 1.9** or later
 
 ## Installation
 
