@@ -9,13 +9,13 @@ import (
 )
 
 // this is a static check
-var _ Poller = (*longPoller)(nil)
+var _ poller = (*longPoller)(nil)
 
 // NotificationHandler handle namespace update notification
 type NotificationHandler func(*notification)
 
-// Poller fetch confi updates
-type Poller interface {
+// poller fetch confi updates
+type poller interface {
 	Start(handler NotificationHandler)
 	Stop()
 	UpdateNotification(notification *notification)
@@ -37,7 +37,7 @@ type longPoller struct {
 }
 
 // newLongPoller create a Poller
-func newLongPoller(conf *Conf, interval time.Duration) Poller {
+func newLongPoller(conf *Conf, interval time.Duration) poller {
 	poller := &longPoller{
 		appID:          conf.AppID,
 		cluster:        conf.Cluster,

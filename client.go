@@ -19,7 +19,7 @@ type Client struct {
 	mutex  sync.RWMutex
 	caches map[string]*cache
 
-	longPoller Poller
+	longPoller poller
 	client     http.Client
 }
 
