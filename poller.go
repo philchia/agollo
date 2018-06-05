@@ -11,12 +11,12 @@ import (
 // this is a static check
 var _ poller = (*longPoller)(nil)
 
-// NotificationHandler handle namespace update notification
-type NotificationHandler func(*notification)
+// notificationHandler handle namespace update notification
+type notificationHandler func(*notification)
 
 // poller fetch confi updates
 type poller interface {
-	Start(handler NotificationHandler)
+	Start(handler notificationHandler)
 	Stop()
 	UpdateNotification(notification *notification)
 }
@@ -33,7 +33,7 @@ type longPoller struct {
 	client http.Client
 
 	notifications *notificatonRepo
-	handler       NotificationHandler
+	handler       notificationHandler
 }
 
 // newLongPoller create a Poller
@@ -53,7 +53,7 @@ func newLongPoller(conf *Conf, interval time.Duration) poller {
 	return poller
 }
 
-func (p *longPoller) Start(handler NotificationHandler) {
+func (p *longPoller) Start(handler notificationHandler) {
 	p.handler = handler
 	go p.watchUpdates()
 }
