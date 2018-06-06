@@ -17,6 +17,8 @@ func main() {
 
 	changes := agollo.WatchUpdate()
 
+	time.AfterFunc(time.Second*5, func() { agollo.Stop() })
+
 	go func() {
 		for {
 			time.Sleep(time.Second)
