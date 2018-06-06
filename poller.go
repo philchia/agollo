@@ -12,7 +12,7 @@ import (
 var _ poller = (*longPoller)(nil)
 
 // notificationHandler handle namespace update notification
-type notificationHandler func(*notification) error
+type notificationHandler func(string) error
 
 // poller fetch confi updates
 type poller interface {
@@ -69,7 +69,7 @@ func (p *longPoller) watchUpdates() {
 		case <-tick.C:
 			if updates := p.fetch(); len(updates) > 0 {
 				for _, update := range updates {
-					if err := p.handler(update); err != nil {
+					if err := p.handler(update.NamespaceName); err != nil {
 						continue
 					}
 					p.updateNotificationConf(update)

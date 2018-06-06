@@ -64,15 +64,15 @@ func (c *Client) Start() error {
 	return nil
 }
 
-func (c *Client) handleNamespaceUpdate(notification *notification) error {
-	change, err := c.Query(notification.NamespaceName)
+func (c *Client) handleNamespaceUpdate(namespace string) error {
+	change, err := c.query(namespace)
 	if err != nil {
 		return err
 	}
 	if change == nil {
 		return nil
 	}
-	c.DeliveryChangeEvent(change)
+	c.deliveryChangeEvent(change)
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (c *Client) Stop() error {
 // FetchAllCinfig at first run
 func (c *Client) FetchAllCinfig() error {
 	for _, namespace := range c.namespaces {
-		if _, err := c.Query(namespace); err != nil {
+		if _, err := c.query(namespace); err != nil {
 			continue
 		}
 	}
@@ -128,8 +128,8 @@ func (c *Client) GetStringValue(key, defaultValue string) string {
 	return c.GetStringValueWithNameSapce(defaultNamespace, key, defaultValue)
 }
 
-// Query updated namespace config
-func (c *Client) Query(namesapce string) (*ChangeEvent, error) {
+// query updated namespace config
+func (c *Client) query(namesapce string) (*ChangeEvent, error) {
 	url := configURL(c.ip, c.appID, c.cluster, namesapce)
 	bts, err := c.request(url)
 	if err != nil || len(bts) == 0 {
@@ -140,7 +140,7 @@ func (c *Client) Query(namesapce string) (*ChangeEvent, error) {
 		return nil, err
 	}
 
-	return c.HandleResult(&result), nil
+	return c.handleResult(&result), nil
 }
 
 func (c *Client) request(url string) ([]byte, error) {
@@ -159,15 +159,15 @@ func (c *Client) request(url string) ([]byte, error) {
 	return nil, nil
 }
 
-// DeliveryChangeEvent push change to subscriber
-func (c *Client) DeliveryChangeEvent(change *ChangeEvent) {
+// deliveryChangeEvent push change to subscriber
+func (c *Client) deliveryChangeEvent(change *ChangeEvent) {
 	select {
 	case c.updateChan <- change:
 	}
 }
 
-// HandleResult generate changes from query result, and update local cache
-func (c *Client) HandleResult(result *result) *ChangeEvent {
+// handleResult generate changes from query result, and update local cache
+func (c *Client) handleResult(result *result) *ChangeEvent {
 	var ret = ChangeEvent{
 		Namespace: result.NamespaceName,
 		Changes:   map[string]*Change{},
