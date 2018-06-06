@@ -79,7 +79,7 @@ func (c *Client) handleNamespaceUpdate(namespace string) error {
 // Stop sync config
 func (c *Client) Stop() error {
 	c.longPoller.Stop()
-	close(c.updateChan)
+	// close(c.updateChan)
 	return nil
 }
 
