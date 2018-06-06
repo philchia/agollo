@@ -115,7 +115,7 @@ func (c *Client) mustGetCache(namespace string) *cache {
 // GetStringValueWithNameSapce get value from given namespace
 func (c *Client) GetStringValueWithNameSapce(namespace, key, defaultValue string) string {
 	cache := c.mustGetCache(namespace)
-	if ret, ok := cache.Get(key); ok {
+	if ret, ok := cache.Get(key); ok && ret != "" {
 		return ret
 	}
 	return defaultValue
