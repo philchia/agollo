@@ -54,7 +54,7 @@ func NewClient(conf *Conf) (*Client, error) {
 func (c *Client) Start() error {
 
 	// fetch all config to local first
-	if err := c.FetchAllCinfig(); err != nil {
+	if err := c.fetchAllCinfig(); err != nil {
 		return err
 	}
 
@@ -83,8 +83,8 @@ func (c *Client) Stop() error {
 	return nil
 }
 
-// FetchAllCinfig at first run
-func (c *Client) FetchAllCinfig() error {
+// fetchAllCinfig at first run
+func (c *Client) fetchAllCinfig() error {
 	for _, namespace := range c.namespaces {
 		if _, err := c.query(namespace); err != nil {
 			continue
