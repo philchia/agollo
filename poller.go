@@ -3,6 +3,7 @@ package agollo
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -120,5 +121,6 @@ func (p *longPoller) request(url string) ([]byte, error) {
 	if resp.StatusCode == http.StatusOK {
 		return ioutil.ReadAll(resp.Body)
 	}
+	io.Copy(ioutil.Discard, resp.Body)
 	return nil, nil
 }
