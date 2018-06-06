@@ -2,6 +2,7 @@ package agollo
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -104,10 +105,11 @@ func (c *Client) mustGetCache(namespace string) *cache {
 		return ret
 	}
 	c.mutex.RUnlock()
-	cache := newCache()
+
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
+	cache := newCache()
 	c.caches[namespace] = cache
 	return cache
 }
@@ -151,6 +153,9 @@ func (c *Client) request(url string) ([]byte, error) {
 	if resp.StatusCode == http.StatusOK {
 		return ioutil.ReadAll(resp.Body)
 	}
+
+	// Diacard all body if status code is not 200
+	io.Copy(ioutil.Discard, resp.Body)
 	return nil, nil
 }
 
