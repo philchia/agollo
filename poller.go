@@ -69,14 +69,7 @@ func (p *longPoller) watchUpdates() {
 	for {
 		select {
 		case <-tick.C:
-			if updates := p.fetch(); len(updates) > 0 {
-				for _, update := range updates {
-					if err := p.handler(update.NamespaceName); err != nil {
-						continue
-					}
-					p.updateNotificationConf(update)
-				}
-			}
+			p.pumpUpdates()
 		case <-p.ctx.Done():
 			return
 		}
@@ -97,7 +90,19 @@ func (p *longPoller) updateNotificationConf(notification *notification) {
 	p.notifications.SetNotificationID(notification.NamespaceName, notification.NotificationID)
 }
 
-func (p *longPoller) fetch() []*notification {
+// pumpUpdates fetch updated namespace, handle updated namespace then update notification id
+func (p *longPoller) pumpUpdates() {
+	updates := p.poll()
+	for _, update := range updates {
+		if err := p.handler(update.NamespaceName); err != nil {
+			continue
+		}
+		p.updateNotificationConf(update)
+	}
+}
+
+// poll until a update or timeout
+func (p *longPoller) poll() []*notification {
 	notifications := p.notifications.AllNotifications()
 	url := notificationURL(p.ip, p.appID, p.cluster, notifications)
 	bts, err := p.request(url)
