@@ -12,7 +12,7 @@ import (
 var _ poller = (*longPoller)(nil)
 
 // notificationHandler handle namespace update notification
-type notificationHandler func(string) error
+type notificationHandler func(namespace string) error
 
 // poller fetch confi updates
 type poller interface {
@@ -63,6 +63,7 @@ func (p *longPoller) watchUpdates() {
 	defer p.cancel()
 
 	tick := time.NewTicker(p.pollerInterval)
+	defer tick.Stop()
 
 	for {
 		select {
