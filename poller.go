@@ -12,13 +12,12 @@ import (
 var _ poller = (*longPoller)(nil)
 
 // notificationHandler handle namespace update notification
-type notificationHandler func(*notification)
+type notificationHandler func(*notification) error
 
 // poller fetch confi updates
 type poller interface {
 	Start(handler notificationHandler)
 	Stop()
-	UpdateNotification(notification *notification)
 }
 
 type longPoller struct {
@@ -58,10 +57,6 @@ func (p *longPoller) Start(handler notificationHandler) {
 	go p.watchUpdates()
 }
 
-func (p *longPoller) UpdateNotification(notification *notification) {
-	p.updateNotificationConf(notification)
-}
-
 func (p *longPoller) watchUpdates() {
 
 	p.ctx, p.cancel = context.WithCancel(context.Background())
@@ -74,7 +69,10 @@ func (p *longPoller) watchUpdates() {
 		case <-tick.C:
 			if updates := p.fetch(); len(updates) > 0 {
 				for _, update := range updates {
-					p.handler(update)
+					if err := p.handler(update); err != nil {
+						continue
+					}
+					p.updateNotificationConf(update)
 				}
 			}
 		case <-p.ctx.Done():

@@ -57,19 +57,22 @@ func (c *Client) Start() error {
 		return err
 	}
 
-	go func() {
-		c.longPoller.Start(c.handleNamespaceUpdate)
-	}()
+	// start fetch update
+	go c.longPoller.Start(c.handleNamespaceUpdate)
+
 	return nil
 }
 
-func (c *Client) handleNamespaceUpdate(notification *notification) {
+func (c *Client) handleNamespaceUpdate(notification *notification) error {
 	change, err := c.Query(notification.NamespaceName)
-	if err != nil || change == nil {
-		return
+	if err != nil {
+		return err
+	}
+	if change == nil {
+		return nil
 	}
 	c.DeliveryChangeEvent(change)
-	c.longPoller.UpdateNotification(notification)
+	return nil
 }
 
 // Stop sync config
