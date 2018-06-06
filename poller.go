@@ -63,13 +63,15 @@ func (p *longPoller) watchUpdates() {
 	p.ctx, p.cancel = context.WithCancel(context.Background())
 	defer p.cancel()
 
-	tick := time.NewTicker(p.pollerInterval)
-	defer tick.Stop()
+	timer := time.NewTimer(p.pollerInterval)
+	defer timer.Stop()
 
 	for {
 		select {
-		case <-tick.C:
+		case <-timer.C:
 			p.pumpUpdates()
+			timer.Reset(p.pollerInterval)
+
 		case <-p.ctx.Done():
 			return
 		}
