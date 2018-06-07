@@ -68,8 +68,9 @@ func (c *Client) Start() error {
 	return nil
 }
 
+// handleNamespaceUpdate sync config for namespace, delivery changes to subscriber
 func (c *Client) handleNamespaceUpdate(namespace string) error {
-	change, err := c.query(namespace)
+	change, err := c.sync(namespace)
 	if err != nil {
 		return err
 	}
@@ -131,8 +132,8 @@ func (c *Client) GetStringValue(key, defaultValue string) string {
 	return c.GetStringValueWithNameSapce(defaultNamespace, key, defaultValue)
 }
 
-// query updated namespace config
-func (c *Client) query(namesapce string) (*ChangeEvent, error) {
+// sync namespace config
+func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
 	releaseKey := c.getReleaseKey(namesapce)
 	url := configURL(c.ip, c.appID, c.cluster, namesapce, releaseKey)
 	bts, err := c.request(url)
