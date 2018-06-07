@@ -192,7 +192,7 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 			continue
 		}
 		if old != v {
-			ret.Changes[k] = makeModifyChange(k, v)
+			ret.Changes[k] = makeModifyChange(k, old, v)
 		}
 	}
 
@@ -210,10 +210,11 @@ func makeDeleteChange(key, value string) *Change {
 	}
 }
 
-func makeModifyChange(key, value string) *Change {
+func makeModifyChange(key, oldValue, newValue string) *Change {
 	return &Change{
 		ChangeType: MODIFY,
-		NewValue:   value,
+		OldValue:   oldValue,
+		NewValue:   newValue,
 	}
 }
 

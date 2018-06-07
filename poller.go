@@ -18,11 +18,15 @@ type notificationHandler func(namespace string) error
 
 // poller fetch confi updates
 type poller interface {
+	// start poll updates
 	start()
+	// fire a poll on init to fetch all config to local cache, and update all notifications
 	fire() error
+	// stop poll updates
 	stop()
 }
 
+// longPoller implement poller interface
 type longPoller struct {
 	appID   string
 	cluster string
