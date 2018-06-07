@@ -20,6 +20,8 @@ type Client struct {
 	mutex  sync.RWMutex
 	caches map[string]*cache
 
+	releaseKeyRepo *cache
+
 	longPoller poller
 	client     http.Client
 }
@@ -41,7 +43,8 @@ func NewClient(conf *Conf) (*Client, error) {
 		ip:         conf.IP,
 		namespaces: conf.NameSpaceNames,
 
-		caches: map[string]*cache{},
+		caches:         map[string]*cache{},
+		releaseKeyRepo: newCache(),
 
 		client: http.Client{Timeout: queryTimeout},
 	}
@@ -130,7 +133,8 @@ func (c *Client) GetStringValue(key, defaultValue string) string {
 
 // query updated namespace config
 func (c *Client) query(namesapce string) (*ChangeEvent, error) {
-	url := configURL(c.ip, c.appID, c.cluster, namesapce)
+	releaseKey := c.getReleaseKey(namesapce)
+	url := configURL(c.ip, c.appID, c.cluster, namesapce, releaseKey)
 	bts, err := c.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
@@ -196,9 +200,20 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 		}
 	}
 
+	c.setReleaseKey(result.NamespaceName, result.ReleaseKey)
+
 	if len(ret.Changes) == 0 {
 		return nil
 	}
 
 	return &ret
+}
+
+func (c *Client) getReleaseKey(namespace string) string {
+	releaseKey, _ := c.releaseKeyRepo.get(namespace)
+	return releaseKey
+}
+
+func (c *Client) setReleaseKey(namespace, releaseKey string) {
+	c.releaseKeyRepo.set(namespace, releaseKey)
 }
