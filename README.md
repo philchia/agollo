@@ -24,7 +24,7 @@ required **go 1.9** or later
     agollo.Start()
 ```
 
-### Start use custom config file
+### Start use given config file path
 
 ```golang
     agollo.StartWithConfFile(name)
