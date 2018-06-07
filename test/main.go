@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	if err := agollo.StartWithConfFile("../testdata/app.properties"); err != nil {
+	if err := agollo.StartWithConfFile("../testdata/sdfapp.properties"); err != nil {
 		log.Fatal(err)
 	}
 
