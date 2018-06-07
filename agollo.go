@@ -46,5 +46,5 @@ func GetStringValueWithNameSapce(namespace, key, defaultValue string) string {
 
 // GetStringValue from default namespace
 func GetStringValue(key, defaultValue string) string {
-	return defaultClient.GetStringValue(key, defaultValue)
+	return GetStringValueWithNameSapce(defaultNamespace, key, defaultValue)
 }

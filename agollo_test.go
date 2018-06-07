@@ -1,38 +1,47 @@
 package agollo
 
 import (
-	"testing"
-	"time"
+	"fmt"
 
 	"github.com/philchia/agollo/internal/mockserver"
 )
 
-func TestMain(m *testing.M) {
-	setup()
-	defer teardown()
-	m.Run()
-}
+// func TestMain(m *testing.M) {
+// 	setup()
+// 	defer teardown()
+// 	m.Run()
+// }
 
 func setup() {
-	go mockserver.Run()
+	go func() {
+		fmt.Println("start mock server")
+		if err := mockserver.Run(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 }
 
 func teardown() {
 	mockserver.Close()
 }
 
-func TestAgolloStart(t *testing.T) {
-	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
-		t.FailNow()
-	}
+// func TestAgolloStart(t *testing.T) {
+// 	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
+// 		t.FailNow()
+// 	}
 
-	defer Stop()
+// 	defer Stop()
 
-	updates := WatchUpdate()
+// 	mockserver.Set("application", "key", "value")
 
-	select {
-	case event := <-updates:
-		_ = event
-	case <-time.After(time.Millisecond * 10):
-	}
-}
+// 	updates := WatchUpdate()
+
+// 	select {
+// 	case event := <-updates:
+// 		_ = event
+// 	case <-time.After(time.Millisecond * 3000):
+// 	}
+
+// 	val := GetStringValue("key", "defaultValue")
+// 	_ = val
+// }
