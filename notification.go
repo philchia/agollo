@@ -14,11 +14,11 @@ type notificatonRepo struct {
 	notifications sync.Map
 }
 
-func (n *notificatonRepo) SetNotificationID(namesapce string, notificationID int) {
+func (n *notificatonRepo) setNotificationID(namesapce string, notificationID int) {
 	n.notifications.Store(namesapce, notificationID)
 }
 
-func (n *notificatonRepo) GetNotificationID(namespace string) (int, bool) {
+func (n *notificatonRepo) getNotificationID(namespace string) (int, bool) {
 	if val, ok := n.notifications.Load(namespace); ok {
 		if ret, ok := val.(int); ok {
 			return ret, true
@@ -28,7 +28,7 @@ func (n *notificatonRepo) GetNotificationID(namespace string) (int, bool) {
 	return defaultNotificationID, false
 }
 
-func (n *notificatonRepo) AllNotifications() string {
+func (n *notificatonRepo) toString() string {
 	var notifications []*notification
 	n.notifications.Range(func(key, val interface{}) bool {
 		if key, ok := key.(string); ok {

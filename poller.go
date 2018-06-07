@@ -56,7 +56,7 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		handler:        handler,
 	}
 	for _, namespace := range conf.NameSpaceNames {
-		poller.notifications.SetNotificationID(namespace, defaultNotificationID)
+		poller.notifications.setNotificationID(namespace, defaultNotificationID)
 	}
 
 	return poller
@@ -103,7 +103,7 @@ func (p *longPoller) updateNotificationConfs(notifications []*notification) {
 }
 
 func (p *longPoller) updateNotificationConf(notification *notification) {
-	p.notifications.SetNotificationID(notification.NamespaceName, notification.NotificationID)
+	p.notifications.setNotificationID(notification.NamespaceName, notification.NotificationID)
 }
 
 // pumpUpdates fetch updated namespace, handle updated namespace then update notification id
@@ -122,7 +122,7 @@ func (p *longPoller) pumpUpdates() error {
 
 // poll until a update or timeout
 func (p *longPoller) poll() []*notification {
-	notifications := p.notifications.AllNotifications()
+	notifications := p.notifications.toString()
 	url := notificationURL(p.ip, p.appID, p.cluster, notifications)
 	bts, err := p.request(url)
 	if err != nil || len(bts) == 0 {
