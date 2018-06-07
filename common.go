@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"os"
 )
 
 func getLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		os.Stderr.WriteString("Oops:" + err.Error())
-		os.Exit(1)
+		return ""
 	}
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
