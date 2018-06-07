@@ -17,8 +17,9 @@ type notificationHandler func(namespace string) error
 
 // poller fetch confi updates
 type poller interface {
-	Start(handler notificationHandler)
-	Stop()
+	start()
+	fire() error
+	stop()
 }
 
 type longPoller struct {
@@ -37,7 +38,7 @@ type longPoller struct {
 }
 
 // newLongPoller create a Poller
-func newLongPoller(conf *Conf, interval time.Duration) poller {
+func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandler) poller {
 	poller := &longPoller{
 		appID:          conf.AppID,
 		cluster:        conf.Cluster,
@@ -45,6 +46,7 @@ func newLongPoller(conf *Conf, interval time.Duration) poller {
 		pollerInterval: interval,
 		client:         http.Client{Timeout: longPoolTimeout},
 		notifications:  new(notificatonRepo),
+		handler:        handler,
 	}
 	for _, namespace := range conf.NameSpaceNames {
 		poller.notifications.SetNotificationID(namespace, defaultNotificationID)
@@ -53,9 +55,12 @@ func newLongPoller(conf *Conf, interval time.Duration) poller {
 	return poller
 }
 
-func (p *longPoller) Start(handler notificationHandler) {
-	p.handler = handler
+func (p *longPoller) start() {
 	go p.watchUpdates()
+}
+
+func (p *longPoller) fire() error {
+	return p.pumpUpdates()
 }
 
 func (p *longPoller) watchUpdates() {
@@ -78,7 +83,7 @@ func (p *longPoller) watchUpdates() {
 	}
 }
 
-func (p *longPoller) Stop() {
+func (p *longPoller) stop() {
 	p.cancel()
 }
 
@@ -93,14 +98,17 @@ func (p *longPoller) updateNotificationConf(notification *notification) {
 }
 
 // pumpUpdates fetch updated namespace, handle updated namespace then update notification id
-func (p *longPoller) pumpUpdates() {
+func (p *longPoller) pumpUpdates() error {
+	var ret error
 	updates := p.poll()
 	for _, update := range updates {
 		if err := p.handler(update.NamespaceName); err != nil {
+			ret = err
 			continue
 		}
 		p.updateNotificationConf(update)
 	}
+	return ret
 }
 
 // poll until a update or timeout

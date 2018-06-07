@@ -41,11 +41,12 @@ func NewClient(conf *Conf) (*Client, error) {
 		ip:         conf.IP,
 		namespaces: conf.NameSpaceNames,
 
-		updateChan: make(chan *ChangeEvent),
-		caches:     map[string]*cache{},
-		longPoller: newLongPoller(conf, longPoolInterval),
-		client:     http.Client{Timeout: queryTimeout},
+		caches: map[string]*cache{},
+
+		client: http.Client{Timeout: queryTimeout},
 	}
+
+	client.longPoller = newLongPoller(conf, longPoolInterval, client.handleNamespaceUpdate)
 
 	return client, nil
 }
@@ -59,7 +60,7 @@ func (c *Client) Start() error {
 	}
 
 	// start fetch update
-	go c.longPoller.Start(c.handleNamespaceUpdate)
+	go c.longPoller.start()
 
 	return nil
 }
@@ -78,23 +79,22 @@ func (c *Client) handleNamespaceUpdate(namespace string) error {
 
 // Stop sync config
 func (c *Client) Stop() error {
-	c.longPoller.Stop()
-	// close(c.updateChan)
+	c.longPoller.stop()
+	close(c.updateChan)
+	c.updateChan = nil
 	return nil
 }
 
 // fetchAllCinfig at first run
 func (c *Client) fetchAllCinfig() error {
-	for _, namespace := range c.namespaces {
-		if _, err := c.query(namespace); err != nil {
-			continue
-		}
-	}
-	return nil
+	return c.longPoller.fire()
 }
 
 // WatchUpdate get all updates
 func (c *Client) WatchUpdate() <-chan *ChangeEvent {
+	if c.updateChan == nil {
+		c.updateChan = make(chan *ChangeEvent)
+	}
 	return c.updateChan
 }
 
@@ -161,9 +161,10 @@ func (c *Client) request(url string) ([]byte, error) {
 
 // deliveryChangeEvent push change to subscriber
 func (c *Client) deliveryChangeEvent(change *ChangeEvent) {
-	select {
-	case c.updateChan <- change:
+	if c.updateChan == nil {
+		return
 	}
+	c.updateChan <- change
 }
 
 // handleResult generate changes from query result, and update local cache

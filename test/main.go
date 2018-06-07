@@ -13,8 +13,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	defer agollo.Stop()
-
 	changes := agollo.WatchUpdate()
 
 	time.AfterFunc(time.Second*5, func() { agollo.Stop() })
