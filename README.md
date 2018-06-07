@@ -50,3 +50,7 @@ required **go 1.9** or later
     agollo.GetStringValue(Key, defaultValue)
     agollo.GetStringValueWithNameSapce(namespace, key, defaultValue)
 ```
+
+## License
+
+agollo is released under MIT lecense
