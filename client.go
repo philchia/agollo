@@ -117,7 +117,7 @@ func (c *Client) mustGetCache(namespace string) *cache {
 // GetStringValueWithNameSapce get value from given namespace
 func (c *Client) GetStringValueWithNameSapce(namespace, key, defaultValue string) string {
 	cache := c.mustGetCache(namespace)
-	if ret, ok := cache.Get(key); ok && ret != "" {
+	if ret, ok := cache.get(key); ok && ret != "" {
 		return ret
 	}
 	return defaultValue
@@ -175,17 +175,17 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 	}
 
 	cache := c.mustGetCache(result.NamespaceName)
-	kv := cache.All()
+	kv := cache.dump()
 
 	for k, v := range kv {
 		if _, ok := result.Configurations[k]; !ok {
-			cache.Delete(k)
+			cache.delete(k)
 			ret.Changes[k] = makeDeleteChange(k, v)
 		}
 	}
 
 	for k, v := range result.Configurations {
-		cache.Set(k, v)
+		cache.set(k, v)
 		old, ok := kv[k]
 		if !ok {
 			ret.Changes[k] = makeAddChange(k, v)
