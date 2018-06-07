@@ -41,7 +41,7 @@ type longPoller struct {
 	notifications *notificatonRepo
 	handler       notificationHandler
 
-	fireonce sync.Once
+	preloadonce sync.Once
 }
 
 // newLongPoller create a Poller
@@ -68,7 +68,7 @@ func (p *longPoller) start() {
 
 func (p *longPoller) preload() error {
 	var err error
-	p.fireonce.Do(func() { err = p.pumpUpdates() })
+	p.preloadonce.Do(func() { err = p.pumpUpdates() })
 	return err
 }
 
