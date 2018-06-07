@@ -37,3 +37,25 @@ type Change struct {
 	NewValue   string
 	ChangeType ChangeType
 }
+
+func makeDeleteChange(key, value string) *Change {
+	return &Change{
+		ChangeType: DELETE,
+		OldValue:   value,
+	}
+}
+
+func makeModifyChange(key, oldValue, newValue string) *Change {
+	return &Change{
+		ChangeType: MODIFY,
+		OldValue:   oldValue,
+		NewValue:   newValue,
+	}
+}
+
+func makeAddChange(key, value string) *Change {
+	return &Change{
+		ChangeType: ADD,
+		NewValue:   value,
+	}
+}
