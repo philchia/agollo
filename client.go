@@ -1,6 +1,7 @@
 package agollo
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -24,6 +25,9 @@ type Client struct {
 
 	longPoller poller
 	client     http.Client
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // result of query config
@@ -50,7 +54,7 @@ func NewClient(conf *Conf) (*Client, error) {
 	}
 
 	client.longPoller = newLongPoller(conf, longPoolInterval, client.handleNamespaceUpdate)
-
+	client.ctx, client.cancel = context.WithCancel(context.Background())
 	return client, nil
 }
 
@@ -82,6 +86,8 @@ func (c *Client) handleNamespaceUpdate(namespace string) error {
 // Stop sync config
 func (c *Client) Stop() error {
 	c.longPoller.stop()
+	c.cancel()
+	// close(c.updateChan)
 	c.updateChan = nil
 	return nil
 }
@@ -166,7 +172,10 @@ func (c *Client) deliveryChangeEvent(change *ChangeEvent) {
 	if c.updateChan == nil {
 		return
 	}
-	c.updateChan <- change
+	select {
+	case <-c.ctx.Done():
+	case c.updateChan <- change:
+	}
 }
 
 // handleResult generate changes from query result, and update local cache
