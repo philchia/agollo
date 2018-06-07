@@ -21,7 +21,7 @@ type poller interface {
 	// start poll updates
 	start()
 	// fire a poll on init to fetch all config to local cache, and update all notifications
-	fire() error
+	preload() error
 	// stop poll updates
 	stop()
 }
@@ -66,7 +66,7 @@ func (p *longPoller) start() {
 	go p.watchUpdates()
 }
 
-func (p *longPoller) fire() error {
+func (p *longPoller) preload() error {
 	var err error
 	p.fireonce.Do(func() { err = p.pumpUpdates() })
 	return err

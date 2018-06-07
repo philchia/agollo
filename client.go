@@ -57,8 +57,8 @@ func NewClient(conf *Conf) (*Client, error) {
 // Start sync config
 func (c *Client) Start() error {
 
-	// fetch all config to local first
-	if err := c.fetchAllCinfig(); err != nil {
+	// preload all config to local first
+	if err := c.preload(); err != nil {
 		return err
 	}
 
@@ -90,8 +90,8 @@ func (c *Client) Stop() error {
 }
 
 // fetchAllCinfig at first run
-func (c *Client) fetchAllCinfig() error {
-	return c.longPoller.fire()
+func (c *Client) preload() error {
+	return c.longPoller.preload()
 }
 
 // WatchUpdate get all updates
