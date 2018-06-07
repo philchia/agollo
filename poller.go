@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -35,6 +36,8 @@ type longPoller struct {
 
 	notifications *notificatonRepo
 	handler       notificationHandler
+
+	fireonce sync.Once
 }
 
 // newLongPoller create a Poller
@@ -60,7 +63,9 @@ func (p *longPoller) start() {
 }
 
 func (p *longPoller) fire() error {
-	return p.pumpUpdates()
+	var err error
+	p.fireonce.Do(func() { err = p.pumpUpdates() })
+	return err
 }
 
 func (p *longPoller) watchUpdates() {
