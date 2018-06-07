@@ -13,18 +13,18 @@ import (
 // this is a static check
 var _ poller = (*longPoller)(nil)
 
-// notificationHandler handle namespace update notification
-type notificationHandler func(namespace string) error
-
 // poller fetch confi updates
 type poller interface {
 	// start poll updates
 	start()
-	// fire a poll on init to fetch all config to local cache, and update all notifications
+	// preload fetch all config to local cache, and update all notifications
 	preload() error
 	// stop poll updates
 	stop()
 }
+
+// notificationHandler handle namespace update notification
+type notificationHandler func(namespace string) error
 
 // longPoller implement poller interface
 type longPoller struct {

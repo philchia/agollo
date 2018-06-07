@@ -71,12 +71,10 @@ func (c *Client) Start() error {
 // handleNamespaceUpdate sync config for namespace, delivery changes to subscriber
 func (c *Client) handleNamespaceUpdate(namespace string) error {
 	change, err := c.sync(namespace)
-	if err != nil {
+	if err != nil || change == nil {
 		return err
 	}
-	if change == nil {
-		return nil
-	}
+
 	c.deliveryChangeEvent(change)
 	return nil
 }
@@ -84,7 +82,6 @@ func (c *Client) handleNamespaceUpdate(namespace string) error {
 // Stop sync config
 func (c *Client) Stop() error {
 	c.longPoller.stop()
-	close(c.updateChan)
 	c.updateChan = nil
 	return nil
 }
