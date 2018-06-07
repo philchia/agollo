@@ -21,13 +21,6 @@ func getLocalIP() string {
 	return ""
 }
 
-func serverConfigURL(remoteIP, appid string) string {
-	return fmt.Sprintf("http://%s/services/config?appId=%s&ip=%s",
-		remoteIP,
-		url.QueryEscape(appid),
-		getLocalIP())
-}
-
 func notificationURL(remoteIP, appid, cluster, notifications string) string {
 	return fmt.Sprintf("http://%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
 		remoteIP,

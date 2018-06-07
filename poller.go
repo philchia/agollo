@@ -109,7 +109,12 @@ func (p *longPoller) updateNotificationConf(notification *notification) {
 // pumpUpdates fetch updated namespace, handle updated namespace then update notification id
 func (p *longPoller) pumpUpdates() error {
 	var ret error
-	updates := p.poll()
+
+	updates, err := p.poll()
+	if err != nil {
+		return err
+	}
+
 	for _, update := range updates {
 		if err := p.handler(update.NamespaceName); err != nil {
 			ret = err
@@ -121,18 +126,18 @@ func (p *longPoller) pumpUpdates() error {
 }
 
 // poll until a update or timeout
-func (p *longPoller) poll() []*notification {
+func (p *longPoller) poll() ([]*notification, error) {
 	notifications := p.notifications.toString()
 	url := notificationURL(p.ip, p.appID, p.cluster, notifications)
 	bts, err := p.request(url)
 	if err != nil || len(bts) == 0 {
-		return nil
+		return nil, err
 	}
 	var ret []*notification
 	if err := json.Unmarshal(bts, &ret); err != nil {
-		return nil
+		return nil, err
 	}
-	return ret
+	return ret, nil
 }
 
 func (p *longPoller) request(url string) ([]byte, error) {
