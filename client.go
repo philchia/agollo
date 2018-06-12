@@ -2,10 +2,12 @@ package agollo
 
 import (
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 )
 
@@ -92,9 +94,46 @@ func (c *Client) Stop() error {
 	return nil
 }
 
-// fetchAllCinfig at first run
+// fetchAllCinfig fetch from remote, if failed load from local file
 func (c *Client) preload() error {
-	return c.longPoller.preload()
+	if err := c.longPoller.preload(); err != nil {
+		return c.loadLocal(defaultDumpFile)
+	}
+	return nil
+}
+
+// loadLocal load caches from local file
+func (c *Client) loadLocal(name string) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_TRUNC, 0755)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if err := gob.NewDecoder(f).Decode(&c.caches); err != nil {
+		// remove file
+		os.Remove(name)
+		return err
+	}
+
+	return nil
+}
+
+// dump caches to file
+func (c *Client) dump(name string) error {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return gob.NewEncoder(f).Encode(&(c.caches))
 }
 
 // WatchUpdate get all updates
@@ -208,6 +247,9 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 	}
 
 	c.setReleaseKey(result.NamespaceName, result.ReleaseKey)
+
+	// dump caches to file
+	c.dump(defaultDumpFile)
 
 	if len(ret.Changes) == 0 {
 		return nil

@@ -6,6 +6,7 @@ import (
 
 const (
 	defaultConfName  = "app.properties"
+	defaultDumpFile  = ".agollo"
 	defaultNamespace = "application"
 
 	longPoolInterval      = time.Second * 2
