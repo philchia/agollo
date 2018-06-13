@@ -48,4 +48,15 @@ func TestAgolloStart(t *testing.T) {
 	if val != "value" {
 		t.FailNow()
 	}
+
+	mockserver.Set("application", "key", "newvalue")
+	select {
+	case <-updates:
+	case <-time.After(time.Millisecond * 30000):
+	}
+
+	val = defaultClient.GetStringValue("key", "defaultValue")
+	if val != "newvalue" {
+		t.FailNow()
+	}
 }

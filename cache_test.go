@@ -32,6 +32,7 @@ func TestCache(t *testing.T) {
 
 func TestCacheDump(t *testing.T) {
 	var caches = newNamespaceCahce()
+	defer caches.drain()
 	caches.mustGetCache("namespace").set("key", "val")
 
 	f, err := ioutil.TempFile(".", "agollo")
@@ -46,6 +47,7 @@ func TestCacheDump(t *testing.T) {
 	}
 
 	var restore = newNamespaceCahce()
+	defer restore.drain()
 	if err := restore.load(f.Name()); err != nil {
 		t.Error(err)
 	}

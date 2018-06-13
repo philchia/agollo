@@ -96,12 +96,6 @@ func (p *longPoller) stop() {
 	p.cancel()
 }
 
-func (p *longPoller) updateNotificationConfs(notifications []*notification) {
-	for _, noti := range notifications {
-		p.updateNotificationConf(noti)
-	}
-}
-
 func (p *longPoller) updateNotificationConf(notification *notification) {
 	p.notifications.setNotificationID(notification.NamespaceName, notification.NotificationID)
 }
