@@ -32,7 +32,7 @@ type result struct {
 }
 
 // NewClient create client from conf
-func NewClient(conf *Conf) (*Client, error) {
+func NewClient(conf *Conf) *Client {
 	client := &Client{
 		conf:           conf,
 		caches:         newNamespaceCahce(),
@@ -43,7 +43,7 @@ func NewClient(conf *Conf) (*Client, error) {
 
 	client.longPoller = newLongPoller(conf, longPoolInterval, client.handleNamespaceUpdate)
 	client.ctx, client.cancel = context.WithCancel(context.Background())
-	return client, nil
+	return client
 }
 
 // Start sync config

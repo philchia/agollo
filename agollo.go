@@ -20,11 +20,7 @@ func StartWithConfFile(name string) error {
 
 // StartWithConf run agollo with Conf
 func StartWithConf(conf *Conf) error {
-	client, err := NewClient(conf)
-	if err != nil {
-		return err
-	}
-	defaultClient = client
+	defaultClient = NewClient(conf)
 
 	return defaultClient.Start()
 }
