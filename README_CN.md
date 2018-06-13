@@ -1,43 +1,41 @@
-# agollo is a golang client for apollo 🚀 [![CircleCI](https://circleci.com/gh/philchia/agollo/tree/master.svg?style=svg)](https://circleci.com/gh/philchia/agollo/tree/master)
-
-[简体中文](./README_CN.md)
+# agollo 是携程 apollo 配置中心的 golang 客户端 🚀 [![CircleCI](https://circleci.com/gh/philchia/agollo/tree/master.svg?style=svg)](https://circleci.com/gh/philchia/agollo/tree/master)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/philchia/agollo)](https://goreportcard.com/report/github.com/philchia/agollo)
 [![Coverage Status](https://coveralls.io/repos/github/philchia/agollo/badge.svg?branch=master)](https://coveralls.io/github/philchia/agollo?branch=master)
 [![golang](https://img.shields.io/badge/Language-Go-green.svg?style=flat)](https://golang.org)
 [![GoDoc](https://godoc.org/github.com/philchia/zen?status.svg)](https://godoc.org/github.com/philchia/agollo)
 
-## Feature
+## 功能
 
-* Multiple namespace support
-* Fail tolerant
-* Zero dependency
+* 多 namespace 支持
+* 容错，本地缓存
+* 零依赖
 
-## Dependency
+## 依赖
 
-required **go 1.9** or later
+**go 1.9** 或更新
 
-## Installation
+## 安装
 
 ```sh
     go get -u github.com/philchia/agollo
 ```
 
-## Usage
+## 使用
 
-### Start use default app.properties config file
+### 使用 app.properties 配置文件启动
 
 ```golang
     agollo.Start()
 ```
 
-### Start use given config file path
+### 使用自定义配置启动
 
 ```golang
     agollo.StartWithConfFile(name)
 ```
 
-### Subscribe to updates
+### 监听配置更新
 
 ```golang
     events := agollo.WatchUpdate()
@@ -46,13 +44,13 @@ required **go 1.9** or later
     fmt.Println("event:", string(bytes))
 ```
 
-### Get apollo values
+### 获取配置
 
 ```golang
     agollo.GetStringValue(Key, defaultValue)
     agollo.GetStringValueWithNameSapce(namespace, key, defaultValue)
 ```
 
-## License
+## 许可
 
-agollo is released under MIT lecense
+agollo 使用 MIT 许可
