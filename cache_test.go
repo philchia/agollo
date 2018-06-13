@@ -55,4 +55,12 @@ func TestCacheDump(t *testing.T) {
 	if val, _ := restore.mustGetCache("namespace").get("key"); val != "val" {
 		t.FailNow()
 	}
+
+	if err := restore.load("null"); err == nil {
+		t.FailNow()
+	}
+
+	if err := restore.load("./testdata/app.properties"); err == nil {
+		t.FailNow()
+	}
 }
