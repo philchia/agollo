@@ -3,8 +3,6 @@ package agollo
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
@@ -36,7 +34,7 @@ type longPoller struct {
 	ctx            context.Context
 	cancel         context.CancelFunc
 
-	client http.Client
+	requester requester
 
 	notifications *notificatonRepo
 	handler       notificationHandler
@@ -51,7 +49,7 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		cluster:        conf.Cluster,
 		ip:             conf.IP,
 		pollerInterval: interval,
-		client:         http.Client{Timeout: longPoolTimeout},
+		requester:      newHTTPRequester(&http.Client{Timeout: longPoolTimeout}),
 		notifications:  new(notificatonRepo),
 		handler:        handler,
 	}
@@ -123,7 +121,7 @@ func (p *longPoller) pumpUpdates() error {
 func (p *longPoller) poll() ([]*notification, error) {
 	notifications := p.notifications.toString()
 	url := notificationURL(p.ip, p.appID, p.cluster, notifications)
-	bts, err := p.request(url)
+	bts, err := p.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
 	}
@@ -132,18 +130,4 @@ func (p *longPoller) poll() ([]*notification, error) {
 		return nil, err
 	}
 	return ret, nil
-}
-
-func (p *longPoller) request(url string) ([]byte, error) {
-	resp, err := p.client.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		return ioutil.ReadAll(resp.Body)
-	}
-	io.Copy(ioutil.Discard, resp.Body)
-	return nil, nil
 }

@@ -3,8 +3,6 @@ package agollo
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -22,7 +20,7 @@ type Client struct {
 	releaseKeyRepo *cache
 
 	longPoller poller
-	client     http.Client
+	requester  requester
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -48,7 +46,7 @@ func NewClient(conf *Conf) (*Client, error) {
 		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
 
-		client: http.Client{Timeout: queryTimeout},
+		requester: newHTTPRequester(&http.Client{Timeout: queryTimeout}),
 	}
 
 	client.longPoller = newLongPoller(conf, longPoolInterval, client.handleNamespaceUpdate)
@@ -138,7 +136,7 @@ func (c *Client) GetStringValue(key, defaultValue string) string {
 func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
 	releaseKey := c.getReleaseKey(namesapce)
 	url := configURL(c.ip, c.appID, c.cluster, namesapce, releaseKey)
-	bts, err := c.request(url)
+	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
 	}
@@ -148,22 +146,6 @@ func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
 	}
 
 	return c.handleResult(&result), nil
-}
-
-func (c *Client) request(url string) ([]byte, error) {
-	resp, err := c.client.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		return ioutil.ReadAll(resp.Body)
-	}
-
-	// Diacard all body if status code is not 200
-	io.Copy(ioutil.Discard, resp.Body)
-	return nil, nil
 }
 
 // deliveryChangeEvent push change to subscriber
