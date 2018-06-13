@@ -24,8 +24,8 @@ type Client struct {
 
 // result of query config
 type result struct {
-	AppID          string            `json:"appId"`
-	Cluster        string            `json:"cluster"`
+	// AppID          string            `json:"appId"`
+	// Cluster        string            `json:"cluster"`
 	NamespaceName  string            `json:"namespaceName"`
 	Configurations map[string]string `json:"configurations"`
 	ReleaseKey     string            `json:"releaseKey"`
