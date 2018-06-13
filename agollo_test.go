@@ -12,7 +12,7 @@ import (
 func TestMain(m *testing.M) {
 	setup()
 	defer teardown()
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func setup() {

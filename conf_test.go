@@ -16,13 +16,13 @@ func TestNewConf(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    defaultConfName,
+			name:    "./testdata/" + defaultConfName,
 			wantErr: false,
 		},
 	}
 
 	for _, tc := range tcs {
-		if _, err := NewConf(tc.name); (err != nil) != tc.wantErr {
+		if _, err := NewConf(tc.name); (err == nil) == tc.wantErr {
 			t.FailNow()
 		}
 	}
