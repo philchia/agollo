@@ -12,6 +12,10 @@ func TestNewConf(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "./LICENSE",
+			wantErr: true,
+		},
+		{
 			name:    defaultConfName,
 			wantErr: false,
 		},
