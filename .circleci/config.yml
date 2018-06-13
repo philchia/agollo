@@ -23,3 +23,5 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: go test -v -race -cover
+      - run: go get -u github.com/mattn/goveralls
+      - run: goveralls -service=circleci -repotoken $COVERALLS_TOKEN
