@@ -2,7 +2,6 @@ package agollo
 
 import (
 	"encoding/gob"
-	"fmt"
 	"os"
 	"sync"
 )
@@ -47,8 +46,6 @@ func (n *namespaceCache) dump(name string) error {
 	for namespace, cache := range n.caches {
 		dumps[namespace] = cache.dump()
 	}
-
-	fmt.Printf("%#v \n", dumps)
 
 	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
