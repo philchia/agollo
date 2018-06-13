@@ -140,9 +140,27 @@ func (s *mockServer) GetValue(namespace, key string) string {
 	return ""
 }
 
+func (s *mockServer) Delete(namespace, key string) {
+	server.lock.Lock()
+	defer server.lock.Unlock()
+
+	if kv, ok := s.config[namespace]; ok {
+		delete(kv, key)
+	}
+
+	notificationID := s.notifications[namespace]
+	notificationID++
+	s.notifications[namespace] = notificationID
+}
+
 // Set namespace's key value
 func Set(namespace, key, value string) {
 	server.Set(namespace, key, value)
+}
+
+// Delete namespace's key
+func Delete(namespace, key string) {
+	server.Delete(namespace, key)
 }
 
 // Run mock server

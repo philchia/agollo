@@ -59,4 +59,15 @@ func TestAgolloStart(t *testing.T) {
 	if val != "newvalue" {
 		t.FailNow()
 	}
+
+	mockserver.Delete("application", "key")
+	select {
+	case <-updates:
+	case <-time.After(time.Millisecond * 30000):
+	}
+
+	val = GetStringValue("key", "defaultValue")
+	if val != "defaultValue" {
+		t.FailNow()
+	}
 }
