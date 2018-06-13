@@ -34,11 +34,11 @@ func notificationURL(remoteIP, appid, cluster, notifications string) string {
 		url.QueryEscape(notifications))
 }
 
-func configURL(remoteIP, appid, cluster, namespace, releaseKey string) string {
+func configURL(conf *Conf, namespace, releaseKey string) string {
 	return fmt.Sprintf("http://%s/configs/%s/%s/%s?releaseKey=%s&ip=%s",
-		remoteIP,
-		url.QueryEscape(appid),
-		url.QueryEscape(cluster),
+		conf.IP,
+		url.QueryEscape(conf.AppID),
+		url.QueryEscape(conf.Cluster),
 		url.QueryEscape(namespace),
 		releaseKey,
 		getLocalIP())

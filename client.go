@@ -8,15 +8,11 @@ import (
 
 // Client for apollo
 type Client struct {
-	appID      string
-	cluster    string
-	ip         string
-	namespaces []string
+	conf *Conf
 
 	updateChan chan *ChangeEvent
 
-	caches *namespaceCache
-
+	caches         *namespaceCache
 	releaseKeyRepo *cache
 
 	longPoller poller
@@ -38,11 +34,7 @@ type result struct {
 // NewClient create client from conf
 func NewClient(conf *Conf) (*Client, error) {
 	client := &Client{
-		appID:      conf.AppID,
-		cluster:    conf.Cluster,
-		ip:         conf.IP,
-		namespaces: conf.NameSpaceNames,
-
+		conf:           conf,
 		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
 
@@ -135,7 +127,7 @@ func (c *Client) GetStringValue(key, defaultValue string) string {
 // sync namespace config
 func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
 	releaseKey := c.getReleaseKey(namesapce)
-	url := configURL(c.ip, c.appID, c.cluster, namesapce, releaseKey)
+	url := configURL(c.conf, namesapce, releaseKey)
 	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
