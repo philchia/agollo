@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"sync"
 )
 
 // Client for apollo
@@ -18,8 +17,7 @@ type Client struct {
 
 	updateChan chan *ChangeEvent
 
-	mutex  sync.RWMutex
-	caches map[string]*cache
+	caches *namespaceCache
 
 	releaseKeyRepo *cache
 
@@ -47,7 +45,7 @@ func NewClient(conf *Conf) (*Client, error) {
 		ip:         conf.IP,
 		namespaces: conf.NameSpaceNames,
 
-		caches:         map[string]*cache{},
+		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
 
 		client: http.Client{Timeout: queryTimeout},
@@ -92,9 +90,22 @@ func (c *Client) Stop() error {
 	return nil
 }
 
-// fetchAllCinfig at first run
+// fetchAllCinfig fetch from remote, if failed load from local file
 func (c *Client) preload() error {
-	return c.longPoller.preload()
+	if err := c.longPoller.preload(); err != nil {
+		return c.loadLocal(defaultDumpFile)
+	}
+	return nil
+}
+
+// loadLocal load caches from local file
+func (c *Client) loadLocal(name string) error {
+	return c.caches.load(name)
+}
+
+// dump caches to file
+func (c *Client) dump(name string) error {
+	return c.caches.dump(name)
 }
 
 // WatchUpdate get all updates
@@ -106,19 +117,7 @@ func (c *Client) WatchUpdate() <-chan *ChangeEvent {
 }
 
 func (c *Client) mustGetCache(namespace string) *cache {
-	c.mutex.RLock()
-	if ret, ok := c.caches[namespace]; ok {
-		c.mutex.RUnlock()
-		return ret
-	}
-	c.mutex.RUnlock()
-
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	cache := newCache()
-	c.caches[namespace] = cache
-	return cache
+	return c.caches.mustGetCache(namespace)
 }
 
 // GetStringValueWithNameSapce get value from given namespace
@@ -208,6 +207,9 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 	}
 
 	c.setReleaseKey(result.NamespaceName, result.ReleaseKey)
+
+	// dump caches to file
+	c.dump(defaultDumpFile)
 
 	if len(ret.Changes) == 0 {
 		return nil

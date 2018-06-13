@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	server = mockServer{
+	server = &mockServer{
 		notifications: map[string]int{},
 		config:        map[string]map[string]string{},
 	}
@@ -77,7 +77,7 @@ func (s *mockServer) configHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-var server mockServer
+var server *mockServer
 
 func (s *mockServer) Set(namespace, key, value string) {
 	server.lock.Lock()

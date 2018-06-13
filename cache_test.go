@@ -1,6 +1,10 @@
 package agollo
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"testing"
+)
 
 func TestCache(t *testing.T) {
 	cache := newCache()
@@ -22,6 +26,31 @@ func TestCache(t *testing.T) {
 
 	cache.delete("key")
 	if _, ok := cache.get("key"); ok {
+		t.FailNow()
+	}
+}
+
+func TestCacheDump(t *testing.T) {
+	var caches = newNamespaceCahce()
+	caches.mustGetCache("namespace").set("key", "val")
+
+	f, err := ioutil.TempFile(".", "agollo")
+	if err != nil {
+		t.Error(err)
+	}
+	f.Close()
+	defer os.Remove(f.Name())
+
+	if err := caches.dump(f.Name()); err != nil {
+		t.Error(err)
+	}
+
+	var restore = newNamespaceCahce()
+	if err := restore.load(f.Name()); err != nil {
+		t.Error(err)
+	}
+
+	if val, _ := restore.mustGetCache("namespace").get("key"); val != "val" {
 		t.FailNow()
 	}
 }
