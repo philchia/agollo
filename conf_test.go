@@ -3,9 +3,23 @@ package agollo
 import "testing"
 
 func TestNewConf(t *testing.T) {
-	conf, err := NewConf("./testdata/app.properties")
-	if err != nil {
-		t.Error(err)
+	var tcs = []struct {
+		name    string
+		wantErr bool
+	}{
+		{
+			name:    "fakename",
+			wantErr: true,
+		},
+		{
+			name:    defaultConfName,
+			wantErr: false,
+		},
 	}
-	_ = conf
+
+	for _, tc := range tcs {
+		if _, err := NewConf(tc.name); (err != nil) != tc.wantErr {
+			t.FailNow()
+		}
+	}
 }
