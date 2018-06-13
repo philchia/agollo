@@ -15,8 +15,8 @@ type notification struct {
 }
 
 type result struct {
-	AppID          string            `json:"appId"`
-	Cluster        string            `json:"cluster"`
+	// AppID          string            `json:"appId"`
+	// Cluster        string            `json:"cluster"`
 	NamespaceName  string            `json:"namespaceName"`
 	Configurations map[string]string `json:"configurations"`
 	ReleaseKey     string            `json:"releaseKey"`
@@ -62,10 +62,10 @@ func (s *mockServer) ConfigHandler(rw http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 
 	strs := strings.Split(req.RequestURI, "/")
-	var appid, cluster, namespace, releaseKey = strs[2], strs[3], strings.Split(strs[4], "?")[0], req.FormValue("releaseKey")
+	var namespace, releaseKey = strings.Split(strs[4], "?")[0], req.FormValue("releaseKey")
 	config := s.Get(namespace)
 
-	var result = result{AppID: appid, Cluster: cluster, NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
+	var result = result{NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
 	bts, err := json.Marshal(&result)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
