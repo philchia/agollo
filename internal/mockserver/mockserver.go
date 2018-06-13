@@ -3,18 +3,11 @@ package mockserver
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
-
-func init() {
-	server = &mockServer{
-		notifications: map[string]int{},
-		config:        map[string]map[string]string{},
-	}
-}
 
 type mockServer struct {
 	once   sync.Once
@@ -25,13 +18,12 @@ type mockServer struct {
 	config        map[string]map[string]string
 }
 
-func (s *mockServer) notificationHandler(rw http.ResponseWriter, req *http.Request) {
+func (s *mockServer) NotificationHandler(rw http.ResponseWriter, req *http.Request) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
 	req.ParseForm()
 	query := req.FormValue("notifications")
-	fmt.Println(query)
 	var notifications []struct {
 		NamespaceName  string `json:"namespaceName,omitempty"`
 		NotificationID int    `json:"notificationId,omitempty"`
@@ -73,8 +65,43 @@ func (s *mockServer) notificationHandler(rw http.ResponseWriter, req *http.Reque
 	rw.Write(bts)
 }
 
-func (s *mockServer) configHandler(rw http.ResponseWriter, req *http.Request) {
+func (s *mockServer) ConfigHandler(rw http.ResponseWriter, req *http.Request) {
+	req.ParseForm()
 
+	var appid, cluster, namespace, releaseKey, ip string
+
+	strs := strings.Split(req.RequestURI, "/")
+
+	appid = strs[2]
+	cluster = strs[3]
+	namespace = strings.Split(strs[4], "?")[0]
+	releaseKey = req.FormValue("releaseKey")
+	ip = req.FormValue("ip")
+	_ = ip
+	config := s.Get(namespace)
+
+	var result = struct {
+		AppID          string            `json:"appId"`
+		Cluster        string            `json:"cluster"`
+		NamespaceName  string            `json:"namespaceName"`
+		Configurations map[string]string `json:"configurations"`
+		ReleaseKey     string            `json:"releaseKey"`
+	}{}
+
+	result.AppID = appid
+	result.Cluster = cluster
+	result.NamespaceName = namespace
+	result.Configurations = config
+	result.ReleaseKey = releaseKey
+
+	bts, err := json.Marshal(&result)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	rw.Write(bts)
+	return
 }
 
 var server *mockServer
@@ -95,6 +122,24 @@ func (s *mockServer) Set(namespace, key, value string) {
 	s.config[namespace] = kv
 }
 
+func (s *mockServer) Get(namespace string) map[string]string {
+	server.lock.Lock()
+	defer server.lock.Unlock()
+
+	return s.config[namespace]
+}
+
+func (s *mockServer) GetValue(namespace, key string) string {
+	server.lock.Lock()
+	defer server.lock.Unlock()
+
+	if kv, ok := s.config[namespace]; ok {
+		return kv[key]
+	}
+
+	return ""
+}
+
 // Set namespace's key value
 func Set(namespace, key, value string) {
 	server.Set(namespace, key, value)
@@ -107,10 +152,14 @@ func Run() error {
 }
 
 func initServer() {
+	server = &mockServer{
+		notifications: map[string]int{},
+		config:        map[string]map[string]string{},
+	}
 	server.once.Do(func() {
 		mux := http.NewServeMux()
-		mux.Handle("/notifications", http.HandlerFunc(server.notificationHandler))
-		mux.Handle("/configs", http.HandlerFunc(server.configHandler))
+		mux.Handle("/notifications/", http.HandlerFunc(server.NotificationHandler))
+		mux.Handle("/configs/", http.HandlerFunc(server.ConfigHandler))
 		server.server.Handler = mux
 		server.server.Addr = ":8080"
 	})
