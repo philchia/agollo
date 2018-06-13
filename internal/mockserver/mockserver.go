@@ -9,8 +9,20 @@ import (
 	"time"
 )
 
+type notification struct {
+	NamespaceName  string `json:"namespaceName,omitempty"`
+	NotificationID int    `json:"notificationId,omitempty"`
+}
+
+type result struct {
+	AppID          string            `json:"appId"`
+	Cluster        string            `json:"cluster"`
+	NamespaceName  string            `json:"namespaceName"`
+	Configurations map[string]string `json:"configurations"`
+	ReleaseKey     string            `json:"releaseKey"`
+}
+
 type mockServer struct {
-	once   sync.Once
 	server http.Server
 
 	lock          sync.Mutex
@@ -21,33 +33,16 @@ type mockServer struct {
 func (s *mockServer) NotificationHandler(rw http.ResponseWriter, req *http.Request) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-
 	req.ParseForm()
-	query := req.FormValue("notifications")
-	var notifications []struct {
-		NamespaceName  string `json:"namespaceName,omitempty"`
-		NotificationID int    `json:"notificationId,omitempty"`
-	}
-
-	if err := json.Unmarshal([]byte(query), &notifications); err != nil {
+	var notifications []notification
+	if err := json.Unmarshal([]byte(req.FormValue("notifications")), &notifications); err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	var changes []struct {
-		NamespaceName  string `json:"namespaceName,omitempty"`
-		NotificationID int    `json:"notificationId,omitempty"`
-	}
-
+	var changes []notification
 	for _, noti := range notifications {
 		if currentID := s.notifications[noti.NamespaceName]; currentID != noti.NotificationID {
-			changes = append(changes, struct {
-				NamespaceName  string `json:"namespaceName,omitempty"`
-				NotificationID int    `json:"notificationId,omitempty"`
-			}{
-				NamespaceName:  noti.NamespaceName,
-				NotificationID: currentID,
-			})
+			changes = append(changes, notification{NamespaceName: noti.NamespaceName, NotificationID: currentID})
 		}
 	}
 
@@ -55,53 +50,28 @@ func (s *mockServer) NotificationHandler(rw http.ResponseWriter, req *http.Reque
 		rw.WriteHeader(http.StatusNotModified)
 		return
 	}
-
 	bts, err := json.Marshal(&changes)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	rw.Write(bts)
 }
 
 func (s *mockServer) ConfigHandler(rw http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 
-	var appid, cluster, namespace, releaseKey, ip string
-
 	strs := strings.Split(req.RequestURI, "/")
-
-	appid = strs[2]
-	cluster = strs[3]
-	namespace = strings.Split(strs[4], "?")[0]
-	releaseKey = req.FormValue("releaseKey")
-	ip = req.FormValue("ip")
-	_ = ip
+	var appid, cluster, namespace, releaseKey = strs[2], strs[3], strings.Split(strs[4], "?")[0], req.FormValue("releaseKey")
 	config := s.Get(namespace)
 
-	var result = struct {
-		AppID          string            `json:"appId"`
-		Cluster        string            `json:"cluster"`
-		NamespaceName  string            `json:"namespaceName"`
-		Configurations map[string]string `json:"configurations"`
-		ReleaseKey     string            `json:"releaseKey"`
-	}{}
-
-	result.AppID = appid
-	result.Cluster = cluster
-	result.NamespaceName = namespace
-	result.Configurations = config
-	result.ReleaseKey = releaseKey
-
+	var result = result{AppID: appid, Cluster: cluster, NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
 	bts, err := json.Marshal(&result)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	rw.Write(bts)
-	return
 }
 
 var server *mockServer
@@ -174,13 +144,11 @@ func initServer() {
 		notifications: map[string]int{},
 		config:        map[string]map[string]string{},
 	}
-	server.once.Do(func() {
-		mux := http.NewServeMux()
-		mux.Handle("/notifications/", http.HandlerFunc(server.NotificationHandler))
-		mux.Handle("/configs/", http.HandlerFunc(server.ConfigHandler))
-		server.server.Handler = mux
-		server.server.Addr = ":8080"
-	})
+	mux := http.NewServeMux()
+	mux.Handle("/notifications/", http.HandlerFunc(server.NotificationHandler))
+	mux.Handle("/configs/", http.HandlerFunc(server.ConfigHandler))
+	server.server.Handler = mux
+	server.server.Addr = ":8080"
 }
 
 // Close mock server
