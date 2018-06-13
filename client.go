@@ -21,7 +21,7 @@ type Client struct {
 	updateChan chan *ChangeEvent
 
 	mutex  sync.RWMutex
-	caches map[string]*cache
+	caches *namespaceCache
 
 	releaseKeyRepo *cache
 
@@ -49,7 +49,7 @@ func NewClient(conf *Conf) (*Client, error) {
 		ip:         conf.IP,
 		namespaces: conf.NameSpaceNames,
 
-		caches:         map[string]*cache{},
+		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
 
 		client: http.Client{Timeout: queryTimeout},
@@ -104,22 +104,7 @@ func (c *Client) preload() error {
 
 // loadLocal load caches from local file
 func (c *Client) loadLocal(name string) error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_TRUNC, 0755)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if err := gob.NewDecoder(f).Decode(&c.caches); err != nil {
-		// remove file
-		os.Remove(name)
-		return err
-	}
-
-	return nil
+	return c.caches.load(name)
 }
 
 // dump caches to file
@@ -145,19 +130,7 @@ func (c *Client) WatchUpdate() <-chan *ChangeEvent {
 }
 
 func (c *Client) mustGetCache(namespace string) *cache {
-	c.mutex.RLock()
-	if ret, ok := c.caches[namespace]; ok {
-		c.mutex.RUnlock()
-		return ret
-	}
-	c.mutex.RUnlock()
-
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	cache := newCache()
-	c.caches[namespace] = cache
-	return cache
+	return c.caches.mustGetCache(namespace)
 }
 
 // GetStringValueWithNameSapce get value from given namespace
