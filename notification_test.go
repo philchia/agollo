@@ -15,6 +15,10 @@ func TestNotification(t *testing.T) {
 		t.FailNow()
 	}
 
+	if id, ok := repo.getNotificationID("null"); ok || id != defaultNotificationID {
+		t.FailNow()
+	}
+
 	if str := repo.toString(); str == "" {
 		t.FailNow()
 	}
