@@ -26,13 +26,21 @@ func TestRequest(t *testing.T) {
 	serv = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}))
-
 	bts, err = request.request(serv.URL)
 	if err != nil {
 		t.Error(err)
 	}
 
 	if len(bts) != 0 {
+		t.FailNow()
+	}
+
+	serv = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.WriteHeader(http.StatusInternalServerError)
+	}))
+	serv.Close()
+	bts, err = request.request(serv.URL)
+	if err == nil {
 		t.FailNow()
 	}
 }
