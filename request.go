@@ -6,6 +6,9 @@ import (
 	"net/http"
 )
 
+// this is a static check
+var _ requester = (*httprequester)(nil)
+
 type requester interface {
 	request(url string) ([]byte, error)
 }
