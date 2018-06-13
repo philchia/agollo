@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sync"
 	"time"
 )
 
@@ -36,8 +35,6 @@ type longPoller struct {
 
 	notifications *notificatonRepo
 	handler       notificationHandler
-
-	preloadonce sync.Once
 }
 
 // newLongPoller create a Poller
@@ -61,9 +58,7 @@ func (p *longPoller) start() {
 }
 
 func (p *longPoller) preload() error {
-	var err error
-	p.preloadonce.Do(func() { err = p.pumpUpdates() })
-	return err
+	return p.pumpUpdates()
 }
 
 func (p *longPoller) watchUpdates() {
