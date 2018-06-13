@@ -111,11 +111,10 @@ func (c *cache) delete(key string) {
 func (c *cache) dump() map[string]string {
 	var ret = map[string]string{}
 	c.kv.Range(func(key, val interface{}) bool {
-		if key, ok := key.(string); ok {
-			if val, ok := val.(string); ok {
-				ret[key] = val
-			}
-		}
+		k, _ := key.(string)
+		v, _ := val.(string)
+		ret[k] = v
+
 		return true
 	})
 	return ret
