@@ -2,6 +2,7 @@ package agollo
 
 import (
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -32,8 +33,11 @@ func TestAgolloStart(t *testing.T) {
 	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
 		t.FailNow()
 	}
-
 	defer Stop()
+	defer os.Remove(defaultDumpFile)
+	if err := defaultClient.loadLocal(defaultDumpFile); err != nil {
+		t.FailNow()
+	}
 
 	mockserver.Set("application", "key", "value")
 
