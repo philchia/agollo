@@ -26,9 +26,7 @@ type notificationHandler func(namespace string) error
 
 // longPoller implement poller interface
 type longPoller struct {
-	appID   string
-	cluster string
-	ip      string
+	conf *Conf
 
 	pollerInterval time.Duration
 	ctx            context.Context
@@ -45,9 +43,7 @@ type longPoller struct {
 // newLongPoller create a Poller
 func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandler) poller {
 	poller := &longPoller{
-		appID:          conf.AppID,
-		cluster:        conf.Cluster,
-		ip:             conf.IP,
+		conf:           conf,
 		pollerInterval: interval,
 		requester:      newHTTPRequester(&http.Client{Timeout: longPoolTimeout}),
 		notifications:  new(notificatonRepo),
@@ -120,7 +116,7 @@ func (p *longPoller) pumpUpdates() error {
 // poll until a update or timeout
 func (p *longPoller) poll() ([]*notification, error) {
 	notifications := p.notifications.toString()
-	url := notificationURL(p.ip, p.appID, p.cluster, notifications)
+	url := notificationURL(p.conf, notifications)
 	bts, err := p.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err

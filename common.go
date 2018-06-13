@@ -26,11 +26,11 @@ func toIP4(addr net.Addr) net.IP {
 	return nil
 }
 
-func notificationURL(remoteIP, appid, cluster, notifications string) string {
+func notificationURL(conf *Conf, notifications string) string {
 	return fmt.Sprintf("http://%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
-		remoteIP,
-		url.QueryEscape(appid),
-		url.QueryEscape(cluster),
+		conf.IP,
+		url.QueryEscape(conf.AppID),
+		url.QueryEscape(conf.Cluster),
 		url.QueryEscape(notifications))
 }
 
