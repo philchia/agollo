@@ -2,13 +2,10 @@ package agollo
 
 import (
 	"context"
-	"encoding/gob"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"sync"
 )
 
 // Client for apollo
@@ -20,7 +17,6 @@ type Client struct {
 
 	updateChan chan *ChangeEvent
 
-	mutex  sync.RWMutex
 	caches *namespaceCache
 
 	releaseKeyRepo *cache
@@ -109,16 +105,7 @@ func (c *Client) loadLocal(name string) error {
 
 // dump caches to file
 func (c *Client) dump(name string) error {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return gob.NewEncoder(f).Encode(&(c.caches))
+	return c.caches.dump(name)
 }
 
 // WatchUpdate get all updates

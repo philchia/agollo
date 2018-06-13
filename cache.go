@@ -62,9 +62,8 @@ func (n *namespaceCache) dump(name string) error {
 func (n *namespaceCache) load(name string) error {
 	n.drain()
 
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0755)
+	f, err := os.OpenFile(name, os.O_RDONLY, 0755)
 	if err != nil {
-		fmt.Println("open file err", err)
 		return err
 	}
 	defer f.Close()
@@ -72,8 +71,6 @@ func (n *namespaceCache) load(name string) error {
 	var dumps = map[string]map[string]string{}
 
 	if err := gob.NewDecoder(f).Decode(&dumps); err != nil {
-		fmt.Println("decode err", err)
-
 		return err
 	}
 
