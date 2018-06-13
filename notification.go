@@ -31,14 +31,13 @@ func (n *notificatonRepo) getNotificationID(namespace string) (int, bool) {
 func (n *notificatonRepo) toString() string {
 	var notifications []*notification
 	n.notifications.Range(func(key, val interface{}) bool {
-		if key, ok := key.(string); ok {
-			if val, ok := val.(int); ok {
-				notifications = append(notifications, &notification{
-					NamespaceName:  key,
-					NotificationID: val,
-				})
-			}
-		}
+		k, _ := key.(string)
+		v, _ := val.(int)
+		notifications = append(notifications, &notification{
+			NamespaceName:  k,
+			NotificationID: v,
+		})
+
 		return true
 	})
 
