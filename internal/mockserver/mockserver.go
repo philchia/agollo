@@ -99,17 +99,6 @@ func (s *mockServer) Get(namespace string) map[string]string {
 	return s.config[namespace]
 }
 
-func (s *mockServer) GetValue(namespace, key string) string {
-	server.lock.Lock()
-	defer server.lock.Unlock()
-
-	if kv, ok := s.config[namespace]; ok {
-		return kv[key]
-	}
-
-	return ""
-}
-
 func (s *mockServer) Delete(namespace, key string) {
 	server.lock.Lock()
 	defer server.lock.Unlock()
