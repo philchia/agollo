@@ -133,3 +133,4 @@ $RECYCLE.BIN/
 
 
 # End of https://www.gitignore.io/api/go,osx,vim,linux,windows,sublimetext,visualstudiocode
+/.idea/
