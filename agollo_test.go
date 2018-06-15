@@ -30,6 +30,10 @@ func teardown() {
 }
 
 func TestAgolloStart(t *testing.T) {
+	if err := Start(); err == nil {
+		t.FailNow()
+	}
+
 	if err := StartWithConfFile("fake.properties"); err == nil {
 		t.FailNow()
 	}
