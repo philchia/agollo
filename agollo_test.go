@@ -11,8 +11,9 @@ import (
 
 func TestMain(m *testing.M) {
 	setup()
-	defer teardown()
-	os.Exit(m.Run())
+	code := m.Run()
+	teardown()
+	os.Exit(code)
 }
 
 func setup() {
