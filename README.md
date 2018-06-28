@@ -17,9 +17,9 @@
 * Fail tolerant
 * Zero dependency
 
-## Dependency
+## Required
 
-required **go 1.9** or later
+**go 1.9** or later
 
 ## Installation
 
