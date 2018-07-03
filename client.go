@@ -124,6 +124,11 @@ func (c *Client) GetStringValue(key, defaultValue string) string {
 	return c.GetStringValueWithNameSapce(defaultNamespace, key, defaultValue)
 }
 
+// GetNameSpaceContent get contents of namespace
+func (c *Client) GetNameSpaceContent(namespace, defaultValue string) string {
+	return c.GetStringValueWithNameSapce(namespace, "content", defaultValue)
+}
+
 // sync namespace config
 func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
 	releaseKey := c.getReleaseKey(namesapce)
