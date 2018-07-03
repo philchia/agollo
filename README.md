@@ -57,6 +57,12 @@
     agollo.GetStringValueWithNameSapce(namespace, key, defaultValue)
 ```
 
+### Get namespace file contents
+
+```golang
+    agollo.GetNameSpaceContent(namespace, defaultValue)
+```
+
 ## License
 
 agollo is released under MIT lecense
