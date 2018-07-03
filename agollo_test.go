@@ -91,7 +91,7 @@ func TestAgolloStart(t *testing.T) {
 	}
 
 	val = GetNameSpaceContent("client.json", "{}")
-	if val == "{}" {
-		t.Errorf("GetStringValue of client.json content should = {}, got %v", val)
+	if val != `{"name":"agollo"}` {
+		t.Errorf(`GetStringValue of client.json content should  = {"name":"agollo"}, got %v`, val)
 	}
 }
