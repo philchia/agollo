@@ -45,7 +45,7 @@
 
 ```golang
     events := agollo.WatchUpdate()
-    changeEvent := <-event
+    changeEvent := <-events
     bytes, _ := json.Marshal(changeEvent)
     fmt.Println("event:", string(bytes))
 ```
