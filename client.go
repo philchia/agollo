@@ -111,7 +111,7 @@ func (c *Client) mustGetCache(namespace string) *cache {
 }
 
 // GetStringValueWithNameSapce get value from given namespace
-func (c *Client) GetStringValueWithNameSapce(namespace, key, defaultValue string) string {
+func (c *Client) GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
 	cache := c.mustGetCache(namespace)
 	if ret, ok := cache.get(key); ok && ret != "" {
 		return ret
@@ -121,12 +121,12 @@ func (c *Client) GetStringValueWithNameSapce(namespace, key, defaultValue string
 
 // GetStringValue from default namespace
 func (c *Client) GetStringValue(key, defaultValue string) string {
-	return c.GetStringValueWithNameSapce(defaultNamespace, key, defaultValue)
+	return c.GetStringValueWithNameSpace(defaultNamespace, key, defaultValue)
 }
 
 // GetNameSpaceContent get contents of namespace
 func (c *Client) GetNameSpaceContent(namespace, defaultValue string) string {
-	return c.GetStringValueWithNameSapce(namespace, "content", defaultValue)
+	return c.GetStringValueWithNameSpace(namespace, "content", defaultValue)
 }
 
 // sync namespace config
