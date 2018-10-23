@@ -54,7 +54,7 @@
 
 ```golang
     agollo.GetStringValue(Key, defaultValue)
-    agollo.GetStringValueWithNameSapce(namespace, key, defaultValue)
+    agollo.GetStringValueWithNameSpace(namespace, key, defaultValue)
 ```
 
 ### Get namespace file contents
