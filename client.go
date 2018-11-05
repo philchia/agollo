@@ -3,6 +3,7 @@ package agollo
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -83,7 +84,7 @@ func (c *Client) Stop() error {
 // fetchAllCinfig fetch from remote, if failed load from local file
 func (c *Client) preload() error {
 	if err := c.longPoller.preload(); err != nil {
-		return c.loadLocal(defaultDumpFile)
+		return c.loadLocal(c.getDumpFileName())
 	}
 	return nil
 }
@@ -188,13 +189,17 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 	c.setReleaseKey(result.NamespaceName, result.ReleaseKey)
 
 	// dump caches to file
-	c.dump(defaultDumpFile)
+	c.dump(c.getDumpFileName())
 
 	if len(ret.Changes) == 0 {
 		return nil
 	}
 
 	return &ret
+}
+
+func (c *Client) getDumpFileName() string {
+	return fmt.Sprintf(".%s_%s", c.conf.AppID, c.conf.Cluster)
 }
 
 func (c *Client) getReleaseKey(namespace string) string {

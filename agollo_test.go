@@ -43,9 +43,9 @@ func TestAgolloStart(t *testing.T) {
 		t.Errorf("Start with app.properties should return nil, got :%v", err)
 	}
 	defer Stop()
-	defer os.Remove(defaultDumpFile)
+	defer os.Remove(defaultClient.getDumpFileName())
 
-	if err := defaultClient.loadLocal(defaultDumpFile); err != nil {
+	if err := defaultClient.loadLocal(defaultClient.getDumpFileName()); err != nil {
 		t.Errorf("loadLocal should return nil, got: %v", err)
 	}
 
