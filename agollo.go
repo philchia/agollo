@@ -35,7 +35,7 @@ func WatchUpdate() <-chan *ChangeEvent {
 	return defaultClient.WatchUpdate()
 }
 
-// GetStringValueWithNameSapce get value from given namespace
+// GetStringValueWithNameSpace get value from given namespace
 func GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
 	return defaultClient.GetStringValueWithNameSpace(namespace, key, defaultValue)
 }

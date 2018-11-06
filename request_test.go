@@ -39,7 +39,7 @@ func TestRequest(t *testing.T) {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}))
 	serv.Close()
-	bts, err = request.request(serv.URL)
+	_, err = request.request(serv.URL)
 	if err == nil {
 		t.FailNow()
 	}
