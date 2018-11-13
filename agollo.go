@@ -49,3 +49,8 @@ func GetStringValue(key, defaultValue string) string {
 func GetNameSpaceContent(namespace, defaultValue string) string {
 	return defaultClient.GetNameSpaceContent(namespace, defaultValue)
 }
+
+// GetAllKeys return all config keys in given namespace
+func GetAllKeys(namespace string) []string {
+	return defaultClient.GetAllKeys(namespace)
+}

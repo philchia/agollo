@@ -62,6 +62,11 @@ func TestAgolloStart(t *testing.T) {
 		t.Errorf("GetStringValue of key should = value, got %v", val)
 	}
 
+	keys := GetAllKeys("application")
+	if len(keys) != 1 {
+		t.Errorf("GetAllKeys should return 1 key")
+	}
+
 	mockserver.Set("application", "key", "newvalue")
 	select {
 	case <-updates:
@@ -73,6 +78,11 @@ func TestAgolloStart(t *testing.T) {
 		t.Errorf("GetStringValue of key should = newvalue, got %v", val)
 	}
 
+	keys = GetAllKeys("application")
+	if len(keys) != 1 {
+		t.Errorf("GetAllKeys should return 1 key")
+	}
+
 	mockserver.Delete("application", "key")
 	select {
 	case <-updates:
@@ -82,6 +92,11 @@ func TestAgolloStart(t *testing.T) {
 	val = GetStringValue("key", "defaultValue")
 	if val != "defaultValue" {
 		t.Errorf("GetStringValue of key should = defaultValue, got %v", val)
+	}
+
+	keys = GetAllKeys("application")
+	if len(keys) != 0 {
+		t.Errorf("GetAllKeys should return 0 key")
 	}
 
 	mockserver.Set("client.json", "content", `{"name":"agollo"}`)
