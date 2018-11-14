@@ -12,6 +12,7 @@
 * 多 namespace 支持
 * 容错，本地缓存
 * 零依赖
+* 实时更新通知
 
 ## 依赖
 
@@ -57,6 +58,12 @@
 
 ```golang
     agollo.GetNameSpaceContent(namespace, defaultValue)
+```
+
+### 获取配置中所有的键
+
+```golang
+    agollo.GetAllKeys(namespace)
 ```
 
 ## 许可
