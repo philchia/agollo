@@ -16,6 +16,7 @@
 * Multiple namespace support
 * Fail tolerant
 * Zero dependency
+* Realtime change notification
 
 ## Required
 
@@ -63,6 +64,12 @@
     agollo.GetNameSpaceContent(namespace, defaultValue)
 ```
 
+### Get all keys
+
+```golang
+    agollo.GetAllKeys(namespace)
+```
+
 ## License
 
-agollo is released under MIT lecense
+agollo is released under MIT license
