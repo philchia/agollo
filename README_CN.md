@@ -58,7 +58,7 @@
 
 ### 3, 多种方式获取配置
 
-#### 获取配置
+#### 获取properties配置
 
 ```golang
     // default namespace: application
@@ -80,7 +80,7 @@
     agollo.GetAllKeys(namespace)
 ```
 
-#### Unmarshal
+#### 用Unmarshal获取配置
 
 假设配置中心是这样配置的:
 ![](https://github.com/xujintao/agollo/blob/master/apollo.png)
@@ -98,6 +98,15 @@
 
 然后像这样定义一个struct去获取所有的配置：
 ```golang
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/philchia/agollo"
+)
+
 type config struct {
     // dns 配置
     DNS1 struct {
@@ -117,7 +126,20 @@ type config struct {
         MaxConn string `mapstructure:"max_conn"`
     } `mapstructure:"db"`
 }
-var c config
-agollo.Unmarshal(&c)
-fmt.Printf("%v", c)
+
+func main(){
+    agollo.Start()
+
+    // 第一次读取
+    var c config
+    agollo.Unmarshal(&c)
+    fmt.Printf("%v", c)
+
+    // 热更新
+	agollo.OnConfigChange(func() {
+		var c config
+		agollo.Unmarshal(&c)
+		fmt.Println(c)
+	})
+}
 ```
