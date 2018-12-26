@@ -109,4 +109,27 @@ func TestAgolloStart(t *testing.T) {
 	if val != `{"name":"agollo"}` {
 		t.Errorf(`GetStringValue of client.json content should  = {"name":"agollo"}, got %v`, val)
 	}
+	// mockserver.Delete() how to delete ????
+
+	// Unmarshal
+	mockserver.Set("client.yaml", "content", `name: agollo2`)
+	select {
+	case <-updates:
+	case <-time.After(time.Millisecond * 30000):
+	}
+	type client struct {
+		Client1 struct {
+			Name string `mapstructure:"name"`
+		} `mapstructure:"client.json"`
+		Client2 struct {
+			Name string `mapstructure:"name"`
+		} `mapstructure:"client.yaml"`
+	}
+	var c client
+	if err := Unmarshal(&c); err != nil {
+		t.Errorf("Umarshal failed, got :%v", err)
+	}
+	if c.Client1.Name != "agollo" || c.Client2.Name != "agollo2" {
+		t.Errorf(`Unmarshal result is unexpected, got %v`, c)
+	}
 }

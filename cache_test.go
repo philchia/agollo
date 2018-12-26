@@ -63,4 +63,29 @@ func TestCacheDump(t *testing.T) {
 	if err := restore.load("./testdata/app.properties"); err == nil {
 		t.FailNow()
 	}
+
+	// decode
+	type client struct {
+		APP struct {
+			Key string `mapstructure:"key"`
+		} `mapstructure:"application`
+		Client1 struct {
+			Name string `mapstructure:"name"`
+		} `mapstructure:"client.json"`
+		Client2 struct {
+			Name string `mapstructure:"name"`
+		} `mapstructure:"client.yaml"`
+	}
+	var mc = newNamespaceCahce()
+	defer mc.drain()
+	mc.mustGetCache("application").set("key", "val")
+	mc.mustGetCache("client.json").set("content", `{"name":"json"}`)
+	mc.mustGetCache("client.yaml").set("content", "name: yaml")
+	var c client
+	if err := mc.decode(&c); err != nil {
+		t.FailNow()
+	}
+	if c.APP.Key != "val" || c.Client1.Name != "json" || c.Client2.Name != "yaml" {
+		t.Error(err)
+	}
 }
