@@ -54,3 +54,9 @@ func GetNameSpaceContent(namespace, defaultValue string) string {
 func GetAllKeys(namespace string) []string {
 	return defaultClient.GetAllKeys(namespace)
 }
+
+// Unmarshal unmarshals the config into a struct. Make sure that the tags
+// on the fields of the structure are properly set.
+func Unmarshal(model interface{}) error {
+	return defaultClient.Unmarshal(model)
+}

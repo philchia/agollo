@@ -144,6 +144,11 @@ func (c *Client) GetAllKeys(namespace string) []string {
 	return keys
 }
 
+// Unmarshal unmarshals the config into a struct
+func (c *Client) Unmarshal(model interface{}) error {
+	return c.caches.decode(model)
+}
+
 // sync namespace config
 func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
 	releaseKey := c.getReleaseKey(namesapce)
