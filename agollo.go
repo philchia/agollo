@@ -35,6 +35,11 @@ func WatchUpdate() <-chan *ChangeEvent {
 	return defaultClient.WatchUpdate()
 }
 
+// OnConfigChange when config changed, user code would be called
+func OnConfigChange(run func()) {
+	defaultClient.OnConfigChange(run)
+}
+
 // GetStringValueWithNameSpace get value from given namespace
 func GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
 	return defaultClient.GetStringValueWithNameSpace(namespace, key, defaultValue)

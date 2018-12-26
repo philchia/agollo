@@ -107,6 +107,19 @@ func (c *Client) WatchUpdate() <-chan *ChangeEvent {
 	return c.updateChan
 }
 
+// OnConfigChange when config changed, run would be called
+func (c *Client) OnConfigChange(run func()) {
+	go func() {
+		events := c.WatchUpdate()
+		for {
+			select {
+			case <-events:
+				run()
+			}
+		}
+	}()
+}
+
 func (c *Client) mustGetCache(namespace string) *cache {
 	return c.caches.mustGetCache(namespace)
 }
