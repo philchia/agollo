@@ -51,7 +51,7 @@
 
 ### 2, Subscribe updates
 
-#### WatchUpdate
+#### WatchUpdate, deprecated
 
 ```golang
     events := agollo.WatchUpdate()
@@ -62,8 +62,9 @@
 
 #### Or watch any change with OnConfigChange
 ```golang
-	agollo.OnConfigChange(func() {
-        // to do
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
+        bytes, _ := json.Marshal(e)
+        fmt.Println("event:", string(bytes))
 	})
 ```
 
@@ -118,7 +119,7 @@ import (
 )
 
 type config struct {
-    // dns 配置
+    // dns
     DNS1 struct {
         ID     string `mapstructure:"id"`
         Token  string `mapstructure:"token"`
@@ -146,7 +147,7 @@ func main(){
     fmt.Printf("%v", c)
 
     // watch
-	agollo.OnConfigChange(func() {
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
 		var c config
 		agollo.Unmarshal(&c)
 		fmt.Println(c)

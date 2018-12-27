@@ -108,13 +108,13 @@ func (c *Client) WatchUpdate() <-chan *ChangeEvent {
 }
 
 // OnConfigChange when config changed, run would be called
-func (c *Client) OnConfigChange(run func()) {
+func (c *Client) OnConfigChange(run func(*ChangeEvent)) {
 	go func() {
 		events := c.WatchUpdate()
 		for {
 			select {
-			case <-events:
-				run()
+			case e := <-events:
+				run(e)
 			}
 		}
 	}()

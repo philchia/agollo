@@ -36,7 +36,7 @@ func WatchUpdate() <-chan *ChangeEvent {
 }
 
 // OnConfigChange when config changed, user code would be called
-func OnConfigChange(run func()) {
+func OnConfigChange(run func(*ChangeEvent)) {
 	defaultClient.OnConfigChange(run)
 }
 

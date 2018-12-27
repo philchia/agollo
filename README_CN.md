@@ -47,13 +47,21 @@
 
 ### 2, 热更新
 
-#### 监听配置更新(回头把用户代码用匿名函数包装起来注册到WatchUpdate)
+#### 监听配置更新(这种方式即将被弃用)
 
 ```golang
     events := agollo.WatchUpdate()
     changeEvent := <-event
     bytes, _ := json.Marshal(changeEvent)
     fmt.Println("event:", string(bytes))
+```
+
+#### 或者，使用OnConfigChange接口以回调方式监听配置更新
+```golang
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
+        bytes, _ := json.Marshal(e)
+        fmt.Println("event:", string(bytes))
+	})
 ```
 
 ### 3, 多种方式获取配置
@@ -136,7 +144,7 @@ func main(){
     fmt.Printf("%v", c)
 
     // 热更新
-	agollo.OnConfigChange(func() {
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
 		var c config
 		agollo.Unmarshal(&c)
 		fmt.Println(c)
