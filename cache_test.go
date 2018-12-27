@@ -1,6 +1,7 @@
 package agollo
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -64,11 +65,14 @@ func TestCacheDump(t *testing.T) {
 		t.FailNow()
 	}
 
+}
+
+func TestDecode(t *testing.T) {
 	// decode
-	type client struct {
+	type Client struct {
 		APP struct {
 			Key string `mapstructure:"key"`
-		} `mapstructure:"application`
+		} `mapstructure:"application"`
 		Client1 struct {
 			Name string `mapstructure:"name"`
 		} `mapstructure:"client.json"`
@@ -81,11 +85,14 @@ func TestCacheDump(t *testing.T) {
 	mc.mustGetCache("application").set("key", "val")
 	mc.mustGetCache("client.json").set("content", `{"name":"json"}`)
 	mc.mustGetCache("client.yaml").set("content", "name: yaml")
-	var c client
+	var c Client
 	if err := mc.decode(&c); err != nil {
-		t.FailNow()
-	}
-	if c.APP.Key != "val" || c.Client1.Name != "json" || c.Client2.Name != "yaml" {
 		t.Error(err)
 	}
+
+	fmt.Printf("%+v", c)
+	if c.APP.Key != "val" || c.Client1.Name != "json" || c.Client2.Name != "yaml" {
+		t.FailNow()
+	}
+
 }
