@@ -2,8 +2,13 @@ package agollo
 
 import (
 	"encoding/gob"
+	"encoding/json"
 	"os"
+	"strings"
 	"sync"
+
+	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v2"
 )
 
 type namespaceCache struct {
@@ -79,6 +84,32 @@ func (n *namespaceCache) load(name string) error {
 	}
 
 	return nil
+}
+
+func (n *namespaceCache) decode(model interface{}) error {
+	// prepare input
+	input := make(map[string]interface{})
+	for namespace, cache := range n.caches {
+		switch {
+		case strings.Contains(namespace, ".yaml"):
+			if content, ok := cache.get("content"); ok && content != "" {
+				v := make(map[string]interface{})
+				yaml.Unmarshal([]byte(content), &v)
+				input[namespace] = v
+			}
+		case strings.Contains(namespace, ".json"):
+			if content, ok := cache.get("content"); ok && content != "" {
+				v := make(map[string]interface{})
+				json.Unmarshal([]byte(content), &v)
+				input[namespace] = v
+			}
+		default:
+			input[namespace] = cache.dump()
+		}
+	}
+
+	// decode
+	return mapstructure.Decode(input, model)
 }
 
 type cache struct {

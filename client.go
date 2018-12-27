@@ -107,6 +107,19 @@ func (c *Client) WatchUpdate() <-chan *ChangeEvent {
 	return c.updateChan
 }
 
+// OnConfigChange when config changed, run would be called
+func (c *Client) OnConfigChange(run func(*ChangeEvent)) {
+	go func() {
+		events := c.WatchUpdate()
+		for {
+			select {
+			case e := <-events:
+				run(e)
+			}
+		}
+	}()
+}
+
 func (c *Client) mustGetCache(namespace string) *cache {
 	return c.caches.mustGetCache(namespace)
 }
@@ -142,6 +155,11 @@ func (c *Client) GetAllKeys(namespace string) []string {
 		return true
 	})
 	return keys
+}
+
+// Unmarshal unmarshals the config into a struct
+func (c *Client) Unmarshal(model interface{}) error {
+	return c.caches.decode(model)
 }
 
 // sync namespace config

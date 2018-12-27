@@ -35,6 +35,11 @@ func WatchUpdate() <-chan *ChangeEvent {
 	return defaultClient.WatchUpdate()
 }
 
+// OnConfigChange when config changed, user code would be called
+func OnConfigChange(run func(*ChangeEvent)) {
+	defaultClient.OnConfigChange(run)
+}
+
 // GetStringValueWithNameSpace get value from given namespace
 func GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
 	return defaultClient.GetStringValueWithNameSpace(namespace, key, defaultValue)
@@ -53,4 +58,10 @@ func GetNameSpaceContent(namespace, defaultValue string) string {
 // GetAllKeys return all config keys in given namespace
 func GetAllKeys(namespace string) []string {
 	return defaultClient.GetAllKeys(namespace)
+}
+
+// Unmarshal unmarshals the config into a struct. Make sure that the tags
+// on the fields of the structure are properly set.
+func Unmarshal(model interface{}) error {
+	return defaultClient.Unmarshal(model)
 }

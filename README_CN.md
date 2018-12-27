@@ -11,8 +11,8 @@
 
 * 多 namespace 支持
 * 容错，本地缓存
-* 零依赖
 * 实时更新通知
+* 支持Umarshal
 
 ## 依赖
 
@@ -26,19 +26,28 @@
 
 ## 使用
 
-### 使用 app.properties 配置文件启动
+### 1, 启动
+
+#### 使用 app.properties 配置文件启动
 
 ```golang
     agollo.Start()
 ```
 
-### 使用自定义配置启动
+#### 使用自定义配置启动
 
 ```golang
     agollo.StartWithConfFile(name)
 ```
 
-### 监听配置更新
+#### 使用自定义结构启动
+```golang
+    agollo.StartWithConf(yourConf)
+```
+
+### 2, 热更新
+
+#### 监听配置更新(这种方式即将被弃用)
 
 ```golang
     events := agollo.WatchUpdate()
@@ -47,25 +56,98 @@
     fmt.Println("event:", string(bytes))
 ```
 
-### 获取配置
+#### 或者，使用OnConfigChange接口以回调方式监听配置更新
+```golang
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
+        bytes, _ := json.Marshal(e)
+        fmt.Println("event:", string(bytes))
+	})
+```
+
+### 3, 多种方式获取配置
+
+#### 获取properties配置
 
 ```golang
+    // default namespace: application
     agollo.GetStringValue(Key, defaultValue)
+
+    // user specify namespace
     agollo.GetStringValueWithNameSapce(namespace, key, defaultValue)
 ```
 
-### 获取文件内容
+#### 获取文件内容
 
 ```golang
     agollo.GetNameSpaceContent(namespace, defaultValue)
 ```
 
-### 获取配置中所有的键
+#### 获取配置中所有的键
 
 ```golang
     agollo.GetAllKeys(namespace)
 ```
 
-## 许可
+#### 用Unmarshal获取配置
 
-agollo 使用 MIT 许可
+假设配置中心是这样配置的:
+![](https://github.com/xujintao/agollo/blob/master/apollo.png)
+
+
+那么，我们的元配置(app.properties)应该这样写：
+```json
+{
+    "appId": "001",
+    "cluster": "default",
+    "namespaceNames": ["application","dnspod1","dnspod2.yaml","db"],
+    "ip": "localhost:8080"
+}
+```
+
+然后像这样定义一个struct去获取所有的配置：
+```golang
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/philchia/agollo"
+)
+
+type config struct {
+    // dns 配置
+    DNS1 struct {
+        ID     string `mapstructure:"id"`
+        Token  string `mapstructure:"token"`
+        Domain string `mapstructure:"domain"`
+    } `mapstructure:"dnspod1"`
+    DNS2 struct {
+        ID     int    `mapstructure:"id"`
+        Token  string `mapstructure:"token"`
+        Domain string `mapstructure:"domain"`
+    } `mapstructure:"dnspod2.yaml"`
+
+    // DB
+    DB struct {
+        DSN     string `mapstructure:"dsn"`
+        MaxConn string `mapstructure:"max_conn"`
+    } `mapstructure:"db"`
+}
+
+func main(){
+    agollo.Start()
+
+    // 第一次读取
+    var c config
+    agollo.Unmarshal(&c)
+    fmt.Printf("%v", c)
+
+    // 热更新
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
+		var c config
+		agollo.Unmarshal(&c)
+		fmt.Println(c)
+	})
+}
+```

@@ -15,8 +15,8 @@
 
 * Multiple namespace support
 * Fail tolerant
-* Zero dependency
 * Realtime change notification
+* Unmarshal
 
 ## Required
 
@@ -30,19 +30,28 @@
 
 ## Usage
 
-### Start use default app.properties config file
+### 1, Start
+
+#### Start use default app.properties config file
 
 ```golang
     agollo.Start()
 ```
 
-### Start use given config file path
+#### Start use given config file path
 
 ```golang
     agollo.StartWithConfFile(name)
 ```
 
-### Subscribe to updates
+#### Start with given conf struct
+```golang
+    agollo.StartWithConf(yourConf)
+```
+
+### 2, Subscribe updates
+
+#### WatchUpdate, deprecated
 
 ```golang
     events := agollo.WatchUpdate()
@@ -51,25 +60,97 @@
     fmt.Println("event:", string(bytes))
 ```
 
-### Get apollo values
+#### Or watch any change with OnConfigChange
+```golang
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
+        bytes, _ := json.Marshal(e)
+        fmt.Println("event:", string(bytes))
+	})
+```
+
+### 3, Get config using multi-method
+
+#### Get apollo values
 
 ```golang
+    // default namespace: application
     agollo.GetStringValue(Key, defaultValue)
+    // user specify namespace
     agollo.GetStringValueWithNameSpace(namespace, key, defaultValue)
 ```
 
-### Get namespace file contents
+#### Get namespace file contents
 
 ```golang
     agollo.GetNameSpaceContent(namespace, defaultValue)
 ```
 
-### Get all keys
+#### Get all keys
 
 ```golang
     agollo.GetAllKeys(namespace)
 ```
 
-## License
+#### Unmarshal
 
-agollo is released under MIT license
+There is a config in apollo like this:
+![](https://github.com/xujintao/agollo/blob/master/apollo.png)
+
+
+So our meta-config should like:
+```json
+{
+    "appId": "001",
+    "cluster": "default",
+    "namespaceNames": ["application","dnspod1","dnspod2.yaml","db"],
+    "ip": "localhost:8080"
+}
+```
+
+At last, we make a structure to get all the config
+```golang
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/philchia/agollo"
+)
+
+type config struct {
+    // dns
+    DNS1 struct {
+        ID     string `mapstructure:"id"`
+        Token  string `mapstructure:"token"`
+        Domain string `mapstructure:"domain"`
+    } `mapstructure:"dnspod1"`
+    DNS2 struct {
+        ID     int    `mapstructure:"id"`
+        Token  string `mapstructure:"token"`
+        Domain string `mapstructure:"domain"`
+    } `mapstructure:"dnspod2.yaml"`
+
+    // DB
+    DB struct {
+        DSN     string `mapstructure:"dsn"`
+        MaxConn string `mapstructure:"max_conn"`
+    } `mapstructure:"db"`
+}
+
+func main(){
+    agollo.Start()
+
+    // first
+    var c config
+    agollo.Unmarshal(&c)
+    fmt.Printf("%v", c)
+
+    // watch
+	agollo.OnConfigChange(func(e *agollo.ChangeEvent) {
+		var c config
+		agollo.Unmarshal(&c)
+		fmt.Println(c)
+	})
+}
+```
