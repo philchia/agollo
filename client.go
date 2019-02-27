@@ -111,6 +111,11 @@ func (c *Client) mustGetCache(namespace string) *cache {
 	return c.caches.mustGetCache(namespace)
 }
 
+// SubscribeToNamesapce fetch namespace config to local and subscribe to updates
+func (c *Client) SubscribeToNamesapce(namespace string) error {
+	return c.longPoller.addNamespaces(namespace)
+}
+
 // GetStringValueWithNameSpace get value from given namespace
 func (c *Client) GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
 	cache := c.mustGetCache(namespace)
