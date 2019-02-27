@@ -71,7 +71,6 @@ func (p *longPoller) addNamespaces(namespaces ...string) error {
 }
 
 func (p *longPoller) watchUpdates() {
-
 	p.ctx, p.cancel = context.WithCancel(context.Background())
 	defer p.cancel()
 

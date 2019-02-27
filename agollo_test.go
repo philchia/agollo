@@ -109,4 +109,20 @@ func TestAgolloStart(t *testing.T) {
 	if val != `{"name":"agollo"}` {
 		t.Errorf(`GetStringValue of client.json content should  = {"name":"agollo"}, got %v`, val)
 	}
+
+	if err := SubscribeToNamesapce("new_namespace.json"); err != nil {
+		t.Error(err)
+	}
+
+	mockserver.Set("new_namespace.json", "key", "1")
+	select {
+	case <-updates:
+	case <-time.After(time.Millisecond * 30000):
+	}
+
+	val = GetStringValueWithNameSpace("new_namespace.json", "key", "defaultValue")
+	if val != `1` {
+		t.Errorf(`GetStringValueWithNameSpace of new_namespace.json content should  = 1, got %v`, val)
+	}
+
 }
