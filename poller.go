@@ -18,6 +18,8 @@ type poller interface {
 	preload() error
 	// stop poll updates
 	stop()
+	// addNamespaces add new namespace and pump config data
+	addNamespaces(namespaces ...string) error
 }
 
 // notificationHandler handle namespace update notification
@@ -46,9 +48,8 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		notifications:  new(notificatonRepo),
 		handler:        handler,
 	}
-	for _, namespace := range conf.NameSpaceNames {
-		poller.notifications.setNotificationID(namespace, defaultNotificationID)
-	}
+
+	poller.addNamespaces(conf.NameSpaceNames...)
 
 	return poller
 }
@@ -58,6 +59,14 @@ func (p *longPoller) start() {
 }
 
 func (p *longPoller) preload() error {
+	return p.pumpUpdates()
+}
+
+// addNamespaces subscribe to new namespaces and pull all config data to local
+func (p *longPoller) addNamespaces(namespaces ...string) error {
+	for _, namespace := range namespaces {
+		p.notifications.setNotificationID(namespace, defaultNotificationID)
+	}
 	return p.pumpUpdates()
 }
 
