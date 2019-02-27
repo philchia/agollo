@@ -111,8 +111,8 @@ func (c *Client) mustGetCache(namespace string) *cache {
 	return c.caches.mustGetCache(namespace)
 }
 
-// SubscribeToNamesapce fetch namespace config to local and subscribe to updates
-func (c *Client) SubscribeToNamesapce(namespace string) error {
+// SubscribeToNamespace fetch namespace config to local and subscribe to updates
+func (c *Client) SubscribeToNamespace(namespace string) error {
 	return c.longPoller.addNamespaces(namespace)
 }
 

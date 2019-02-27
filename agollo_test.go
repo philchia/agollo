@@ -110,7 +110,7 @@ func TestAgolloStart(t *testing.T) {
 		t.Errorf(`GetStringValue of client.json content should  = {"name":"agollo"}, got %v`, val)
 	}
 
-	if err := SubscribeToNamesapce("new_namespace.json"); err != nil {
+	if err := SubscribeToNamespace("new_namespace.json"); err != nil {
 		t.Error(err)
 	}
 
