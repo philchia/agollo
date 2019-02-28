@@ -70,6 +70,12 @@
     agollo.GetAllKeys(namespace)
 ```
 
+### Subscribe to namespace
+
+```golang
+    agollo.SubscribeToNamespace("newNamespace")
+```
+
 ## License
 
 agollo is released under MIT license
