@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -29,6 +30,7 @@ type notificationHandler func(namespace string) error
 type longPoller struct {
 	conf *Conf
 
+	sync.Mutex
 	pollerInterval time.Duration
 	ctx            context.Context
 	cancel         context.CancelFunc
@@ -99,6 +101,10 @@ func (p *longPoller) updateNotificationConf(notification *notification) {
 
 // pumpUpdates fetch updated namespace, handle updated namespace then update notification id
 func (p *longPoller) pumpUpdates() error {
+	// serialize pumpUpdates request
+	p.Lock()
+	defer p.Unlock()
+
 	var ret error
 
 	updates, err := p.poll()

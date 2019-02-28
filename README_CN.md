@@ -66,6 +66,12 @@
     agollo.GetAllKeys(namespace)
 ```
 
+### 订阅namespace的配置
+
+```golang
+    agollo.SubscribeToNamespace("newNamespace")
+```
+
 ## 许可
 
 agollo 使用 MIT 许可
