@@ -69,7 +69,7 @@
 ### 订阅namespace的配置
 
 ```golang
-    agollo.SubscribeToNamespace("newNamespace")
+    agollo.SubscribeToNamespaces("newNamespace1", "newNamespace2")
 ```
 
 ## 许可
