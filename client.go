@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -84,6 +85,7 @@ func (c *Client) Stop() error {
 // fetchAllCinfig fetch from remote, if failed load from local file
 func (c *Client) preload() error {
 	if err := c.longPoller.preload(); err != nil {
+		log.Println("[agollo] err preload:", err)
 		return c.loadLocal(c.getDumpFileName())
 	}
 	return nil
@@ -111,9 +113,9 @@ func (c *Client) mustGetCache(namespace string) *cache {
 	return c.caches.mustGetCache(namespace)
 }
 
-// SubscribeToNamespace fetch namespace config to local and subscribe to updates
-func (c *Client) SubscribeToNamespace(namespace string) error {
-	return c.longPoller.addNamespaces(namespace)
+// SubscribeToNamespaces fetch namespace config to local and subscribe to updates
+func (c *Client) SubscribeToNamespaces(namespaces ...string) error {
+	return c.longPoller.addNamespaces(namespaces...)
 }
 
 // GetStringValueWithNameSpace get value from given namespace
