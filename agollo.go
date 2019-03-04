@@ -35,9 +35,9 @@ func WatchUpdate() <-chan *ChangeEvent {
 	return defaultClient.WatchUpdate()
 }
 
-// SubscribeToNamespace fetch namespace config to local and subscribe to updates
-func SubscribeToNamespace(namespace string) error {
-	return defaultClient.SubscribeToNamespace(namespace)
+// SubscribeToNamespaces fetch namespace config to local and subscribe to updates
+func SubscribeToNamespaces(namespaces ...string) error {
+	return defaultClient.SubscribeToNamespaces(namespaces...)
 }
 
 // GetStringValueWithNameSpace get value from given namespace
