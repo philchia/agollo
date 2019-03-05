@@ -14,6 +14,10 @@ type notificatonRepo struct {
 	notifications sync.Map
 }
 
+func (n *notificatonRepo) addNotificationID(namesapce string, notificationID int) {
+	n.notifications.LoadOrStore(namesapce, notificationID)
+}
+
 func (n *notificatonRepo) setNotificationID(namesapce string, notificationID int) {
 	n.notifications.Store(namesapce, notificationID)
 }

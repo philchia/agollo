@@ -70,10 +70,10 @@
     agollo.GetAllKeys(namespace)
 ```
 
-### Subscribe to namespace
+### Subscribe to new namespaces
 
 ```golang
-    agollo.SubscribeToNamespace("newNamespace")
+    agollo.SubscribeToNamespaces("newNamespace1", "newNamespace2")
 ```
 
 ## License
