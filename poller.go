@@ -67,7 +67,7 @@ func (p *longPoller) preload() error {
 // addNamespaces subscribe to new namespaces and pull all config data to local
 func (p *longPoller) addNamespaces(namespaces ...string) error {
 	for _, namespace := range namespaces {
-		p.notifications.setNotificationID(namespace, defaultNotificationID)
+		p.notifications.addNotificationID(namespace, defaultNotificationID)
 	}
 	return p.pumpUpdates()
 }
