@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -30,12 +30,11 @@ type notificationHandler func(namespace string) error
 type longPoller struct {
 	conf *Conf
 
-	sync.Mutex
 	pollerInterval time.Duration
 	ctx            context.Context
 	cancel         context.CancelFunc
-
-	requester requester
+	version        uint64
+	requester      requester
 
 	notifications *notificatonRepo
 	handler       notificationHandler
@@ -51,7 +50,9 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		handler:        handler,
 	}
 
-	poller.addNamespaces(conf.NameSpaceNames...)
+	for _, namespace := range conf.NameSpaceNames {
+		poller.notifications.setNotificationID(namespace, defaultNotificationID)
+	}
 
 	return poller
 }
@@ -66,10 +67,16 @@ func (p *longPoller) preload() error {
 
 // addNamespaces subscribe to new namespaces and pull all config data to local
 func (p *longPoller) addNamespaces(namespaces ...string) error {
+	var update bool
 	for _, namespace := range namespaces {
-		p.notifications.addNotificationID(namespace, defaultNotificationID)
+		if p.notifications.addNotificationID(namespace, defaultNotificationID) {
+			update = true
+		}
 	}
-	return p.pumpUpdates()
+	if update {
+		p.pumpUpdates()
+	}
+	return nil
 }
 
 func (p *longPoller) watchUpdates() {
@@ -102,14 +109,18 @@ func (p *longPoller) updateNotificationConf(notification *notification) {
 // pumpUpdates fetch updated namespace, handle updated namespace then update notification id
 func (p *longPoller) pumpUpdates() error {
 	// serialize pumpUpdates request
-	p.Lock()
-	defer p.Unlock()
+
+	version := atomic.AddUint64(&p.version, 1)
 
 	var ret error
 
 	updates, err := p.poll()
 	if err != nil {
 		return err
+	}
+
+	if atomic.LoadUint64(&p.version) != version {
+		return nil
 	}
 
 	for _, update := range updates {
