@@ -50,7 +50,9 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		handler:        handler,
 	}
 
-	poller.addNamespaces(conf.NameSpaceNames...)
+	for _, namespace := range conf.NameSpaceNames {
+		poller.notifications.setNotificationID(namespace, defaultNotificationID)
+	}
 
 	return poller
 }
@@ -65,10 +67,16 @@ func (p *longPoller) preload() error {
 
 // addNamespaces subscribe to new namespaces and pull all config data to local
 func (p *longPoller) addNamespaces(namespaces ...string) error {
+	var update bool
 	for _, namespace := range namespaces {
-		p.notifications.addNotificationID(namespace, defaultNotificationID)
+		if p.notifications.addNotificationID(namespace, defaultNotificationID) {
+			update = true
+		}
 	}
-	return p.pumpUpdates()
+	if update {
+		p.pumpUpdates()
+	}
+	return nil
 }
 
 func (p *longPoller) watchUpdates() {
