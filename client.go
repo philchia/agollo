@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path"
 )
 
 // Client for apollo
@@ -220,7 +221,9 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 }
 
 func (c *Client) getDumpFileName() string {
-	return fmt.Sprintf(".%s_%s", c.conf.AppID, c.conf.Cluster)
+	cacheDir := c.conf.CacheDir
+	fileName := fmt.Sprintf(".%s_%s", c.conf.AppID, c.conf.Cluster)
+	return path.Join(cacheDir, fileName)
 }
 
 func (c *Client) getReleaseKey(namespace string) string {
