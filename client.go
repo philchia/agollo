@@ -104,7 +104,7 @@ func (c *Client) dump(name string) error {
 // WatchUpdate get all updates
 func (c *Client) WatchUpdate() <-chan *ChangeEvent {
 	if c.updateChan == nil {
-		c.updateChan = make(chan *ChangeEvent)
+		c.updateChan = make(chan *ChangeEvent, 32)
 	}
 	return c.updateChan
 }
