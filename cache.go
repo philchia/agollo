@@ -7,7 +7,7 @@ import (
 )
 
 type namespaceCache struct {
-	lock   sync.RWMutex
+	lock   sync.Mutex
 	caches map[string]*cache
 }
 
@@ -18,15 +18,12 @@ func newNamespaceCahce() *namespaceCache {
 }
 
 func (n *namespaceCache) mustGetCache(namespace string) *cache {
-	n.lock.RLock()
-	if ret, ok := n.caches[namespace]; ok {
-		n.lock.RUnlock()
-		return ret
-	}
-	n.lock.RUnlock()
-
 	n.lock.Lock()
 	defer n.lock.Unlock()
+
+	if ret, ok := n.caches[namespace]; ok {
+		return ret
+	}
 
 	cache := newCache()
 	n.caches[namespace] = cache
