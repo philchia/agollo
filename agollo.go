@@ -59,3 +59,8 @@ func GetNameSpaceContent(namespace, defaultValue string) string {
 func GetAllKeys(namespace string) []string {
 	return defaultClient.GetAllKeys(namespace)
 }
+
+// GetReleaseKey return release key for namespace
+func GetReleaseKey(namespace string) string {
+	return defaultClient.GetReleaseKey(namespace)
+}
