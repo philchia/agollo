@@ -125,4 +125,6 @@ func TestAgolloStart(t *testing.T) {
 		t.Errorf(`GetStringValueWithNameSpace of new_namespace.json content should  = 1, got %v`, val)
 	}
 
+	Stop()
+
 }

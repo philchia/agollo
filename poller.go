@@ -50,6 +50,8 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		handler:        handler,
 	}
 
+	poller.ctx, poller.cancel = context.WithCancel(context.Background())
+
 	for _, namespace := range conf.NameSpaceNames {
 		poller.notifications.setNotificationID(namespace, defaultNotificationID)
 	}
@@ -80,8 +82,6 @@ func (p *longPoller) addNamespaces(namespaces ...string) error {
 }
 
 func (p *longPoller) watchUpdates() {
-	p.ctx, p.cancel = context.WithCancel(context.Background())
-	defer p.cancel()
 
 	timer := time.NewTimer(p.pollerInterval)
 	defer timer.Stop()
