@@ -42,6 +42,14 @@ func TestAgolloStart(t *testing.T) {
 	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
 		t.Errorf("Start with app.properties should return nil, got :%v", err)
 	}
+	if err := Stop(); err != nil {
+		t.Errorf("Stop should return nil, got :%v", err)
+	}
+	os.Remove(defaultClient.getDumpFileName())
+
+	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
+		t.Errorf("Start with app.properties should return nil, got :%v", err)
+	}
 	defer Stop()
 	defer os.Remove(defaultClient.getDumpFileName())
 
@@ -124,7 +132,4 @@ func TestAgolloStart(t *testing.T) {
 	if val != `1` {
 		t.Errorf(`GetStringValueWithNameSpace of new_namespace.json content should  = 1, got %v`, val)
 	}
-
-	Stop()
-
 }

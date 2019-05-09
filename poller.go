@@ -82,7 +82,6 @@ func (p *longPoller) addNamespaces(namespaces ...string) error {
 }
 
 func (p *longPoller) watchUpdates() {
-
 	timer := time.NewTimer(p.pollerInterval)
 	defer timer.Stop()
 
