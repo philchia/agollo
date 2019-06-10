@@ -22,7 +22,6 @@ func TestMain(m *testing.M) {
 		os.Exit(0)
 	}
 	flag.Parse()
-	// _api = New("http://dev-apollo.hellobike.cn:8070", "agollotest", "DEV", "default", "2bc78436d8b0c81f0cf47dcf5346caaf66cb335e")
 	_api = New(*portal, *appid, *env, *cluster, *token)
 
 	os.Exit(m.Run())
