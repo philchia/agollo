@@ -245,19 +245,17 @@ func (c *Client) setReleaseKey(namespace, releaseKey string) {
 // autoCreateCacheDir autoCreateCacheDir
 func (c *Client) autoCreateCacheDir() error {
 	fs, err := os.Stat(c.conf.CacheDir)
-	if err == nil {
-		if !fs.IsDir() {
-			return fmt.Errorf("conf.CacheDir is not a dir")
+	if err != nil {
+		if os.IsNotExist(err) {
+			return os.MkdirAll(c.conf.CacheDir, os.ModePerm)
 		}
-		return nil
+
+		return err
 	}
 
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(c.conf.CacheDir, os.ModePerm)
-		if err != nil {
-			return err
-		}
+	if !fs.IsDir() {
+		return fmt.Errorf("conf.CacheDir is not a dir")
 	}
 
-	return err
+	return nil
 }
