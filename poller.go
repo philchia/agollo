@@ -36,7 +36,7 @@ type longPoller struct {
 	version        uint64
 	requester      requester
 
-	notifications *notificatonRepo
+	notifications *notificationRepo
 	handler       notificationHandler
 }
 
@@ -46,7 +46,7 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 		conf:           conf,
 		pollerInterval: interval,
 		requester:      newHTTPRequester(&http.Client{Timeout: longPoolTimeout}),
-		notifications:  new(notificatonRepo),
+		notifications:  new(notificationRepo),
 		handler:        handler,
 	}
 
