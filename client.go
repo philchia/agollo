@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -51,6 +52,11 @@ func NewClient(conf *Conf) *Client {
 
 // Start sync config
 func (c *Client) Start() error {
+
+	// check cache dir
+	if err := c.autoCreateCacheDir(); err != nil {
+		return err
+	}
 
 	// preload all config to local first
 	if err := c.preload(); err != nil {
@@ -234,4 +240,22 @@ func (c *Client) GetReleaseKey(namespace string) string {
 
 func (c *Client) setReleaseKey(namespace, releaseKey string) {
 	c.releaseKeyRepo.set(namespace, releaseKey)
+}
+
+// autoCreateCacheDir autoCreateCacheDir
+func (c *Client) autoCreateCacheDir() error {
+	fs, err := os.Stat(c.conf.CacheDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return os.MkdirAll(c.conf.CacheDir, os.ModePerm)
+		}
+
+		return err
+	}
+
+	if !fs.IsDir() {
+		return fmt.Errorf("conf.CacheDir is not a dir")
+	}
+
+	return nil
 }
