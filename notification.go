@@ -10,20 +10,20 @@ type notification struct {
 	NotificationID int    `json:"notificationId,omitempty"`
 }
 
-type notificatonRepo struct {
+type notificationRepo struct {
 	notifications sync.Map
 }
 
-func (n *notificatonRepo) addNotificationID(namesapce string, notificationID int) bool {
+func (n *notificationRepo) addNotificationID(namesapce string, notificationID int) bool {
 	_, loaded := n.notifications.LoadOrStore(namesapce, notificationID)
 	return !loaded
 }
 
-func (n *notificatonRepo) setNotificationID(namesapce string, notificationID int) {
+func (n *notificationRepo) setNotificationID(namesapce string, notificationID int) {
 	n.notifications.Store(namesapce, notificationID)
 }
 
-func (n *notificatonRepo) getNotificationID(namespace string) (int, bool) {
+func (n *notificationRepo) getNotificationID(namespace string) (int, bool) {
 	if val, ok := n.notifications.Load(namespace); ok {
 		if ret, ok := val.(int); ok {
 			return ret, true
@@ -33,7 +33,7 @@ func (n *notificatonRepo) getNotificationID(namespace string) (int, bool) {
 	return defaultNotificationID, false
 }
 
-func (n *notificatonRepo) toString() string {
+func (n *notificationRepo) toString() string {
 	var notifications []*notification
 	n.notifications.Range(func(key, val interface{}) bool {
 		k, _ := key.(string)
