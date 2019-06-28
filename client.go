@@ -45,7 +45,7 @@ func NewClient(conf *Conf) *Client {
 		requester: newHTTPRequester(&http.Client{Timeout: queryTimeout}),
 	}
 
-	client.longPoller = newLongPoller(conf, longPoolInterval, client.handleNamespaceUpdate)
+	client.longPoller = newLongPoller(conf, longPollInterval, client.handleNamespaceUpdate)
 	client.ctx, client.cancel = context.WithCancel(context.Background())
 	return client
 }

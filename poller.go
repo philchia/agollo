@@ -45,7 +45,7 @@ func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandl
 	poller := &longPoller{
 		conf:           conf,
 		pollerInterval: interval,
-		requester:      newHTTPRequester(&http.Client{Timeout: longPoolTimeout}),
+		requester:      newHTTPRequester(&http.Client{Timeout: longPollTimeout}),
 		notifications:  new(notificationRepo),
 		handler:        handler,
 	}
