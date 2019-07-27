@@ -28,7 +28,9 @@ func TestRequest(t *testing.T) {
 	}))
 	bts, err = request.request(serv.URL)
 	if err != nil {
-		t.Error(err)
+		if err.Error() != "NotHTTPStatusOK: DiscardBody" {
+			t.Error(err)
+		}
 	}
 
 	if len(bts) != 0 {

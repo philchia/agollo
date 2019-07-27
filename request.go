@@ -1,6 +1,7 @@
 package agollo
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -36,5 +37,5 @@ func (r *httprequester) request(url string) ([]byte, error) {
 
 	// Diacard all body if status code is not 200
 	io.Copy(ioutil.Discard, resp.Body)
-	return nil, nil
+	return nil, errors.New("NotHTTPStatusOK: DiscardBody")
 }
