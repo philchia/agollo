@@ -13,6 +13,7 @@ type Conf struct {
 	NameSpaceNames []string `json:"namespaceNames,omitempty"`
 	CacheDir       string   `json:"cacheDir,omitempty"`
 	IP             string   `json:"ip,omitempty"`
+	MetaAddr       string   `json:"meta_addr"`
 }
 
 // NewConf create Conf from file

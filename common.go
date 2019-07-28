@@ -27,25 +27,33 @@ func toIP4(addr net.Addr) net.IP {
 	return nil
 }
 
-func httpurl(ip string) string {
-	if strings.HasPrefix(ip, "http://")||strings.HasPrefix(ip,"https://") {
-		return ip
+func httpurl(ipOrAddr string) string {
+	if strings.HasPrefix(ipOrAddr, "http://") || strings.HasPrefix(ipOrAddr, "https://") {
+		return ipOrAddr
 	}
 
-	return fmt.Sprintf("http://%s", ip)
+	return fmt.Sprintf("http://%s", ipOrAddr)
 }
 
 func notificationURL(conf *Conf, notifications string) string {
+	var addr = conf.IP
+	if conf.MetaAddr != "" {
+		addr = conf.MetaAddr
+	}
 	return fmt.Sprintf("%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
-		httpurl(conf.IP),
+		httpurl(addr),
 		url.QueryEscape(conf.AppID),
 		url.QueryEscape(conf.Cluster),
 		url.QueryEscape(notifications))
 }
 
 func configURL(conf *Conf, namespace, releaseKey string) string {
-	return fmt.Sprintf("http://%s/configs/%s/%s/%s?releaseKey=%s&ip=%s",
-		conf.IP,
+	var addr = conf.IP
+	if conf.MetaAddr != "" {
+		addr = conf.MetaAddr
+	}
+	return fmt.Sprintf("%s/configs/%s/%s/%s?releaseKey=%s&ip=%s",
+		httpurl(addr),
 		url.QueryEscape(conf.AppID),
 		url.QueryEscape(conf.Cluster),
 		url.QueryEscape(namespace),
