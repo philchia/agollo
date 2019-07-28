@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"strings"
 )
 
 func getLocalIP() string {
@@ -26,9 +27,17 @@ func toIP4(addr net.Addr) net.IP {
 	return nil
 }
 
+func httpurl(ip string) string {
+	if strings.HasPrefix(ip, "http://")||strings.HasPrefix(ip,"https://") {
+		return ip
+	}
+
+	return fmt.Sprintf("http://%s", ip)
+}
+
 func notificationURL(conf *Conf, notifications string) string {
-	return fmt.Sprintf("http://%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
-		conf.IP,
+	return fmt.Sprintf("%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
+		httpurl(conf.IP),
 		url.QueryEscape(conf.AppID),
 		url.QueryEscape(conf.Cluster),
 		url.QueryEscape(notifications))
