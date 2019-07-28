@@ -27,7 +27,7 @@ func TestRequest(t *testing.T) {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}))
 	bts, err = request.request(serv.URL)
-	if err != nil {
+	if err != nil && err != ErrorStatusNotOK {
 		t.Error(err)
 	}
 
