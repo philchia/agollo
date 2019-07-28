@@ -15,9 +15,10 @@ func TestLocalIp(t *testing.T) {
 func TestNotificationURL(t *testing.T) {
 	target := notificationURL(
 		&Conf{
-			IP:      "127.0.0.1:8080",
-			AppID:   "SampleApp",
-			Cluster: "default",
+			IP:       "127.0.0.1:8080",
+			MetaAddr: "http://127.0.0.1:8080",
+			AppID:    "SampleApp",
+			Cluster:  "default",
 		}, "")
 	_, err := url.Parse(target)
 	if err != nil {
@@ -28,9 +29,10 @@ func TestNotificationURL(t *testing.T) {
 func TestConfigURL(t *testing.T) {
 	target := configURL(
 		&Conf{
-			IP:      "127.0.0.1:8080",
-			AppID:   "SampleApp",
-			Cluster: "default",
+			MetaAddr: "127.0.0.1:8080",
+			IP:       "127.0.0.1:8080",
+			AppID:    "SampleApp",
+			Cluster:  "default",
 		}, "application", "")
 	_, err := url.Parse(target)
 	if err != nil {

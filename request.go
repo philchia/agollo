@@ -38,6 +38,6 @@ func (r *httprequester) request(url string) ([]byte, error) {
 	}
 
 	// Diacard all body if status code is not 200
-	io.Copy(ioutil.Discard, resp.Body)
+	_, _ = io.Copy(ioutil.Discard, resp.Body)
 	return nil, ErrorStatusNotOK
 }
