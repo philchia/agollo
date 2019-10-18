@@ -25,7 +25,7 @@
 ## Installation
 
 ```sh
-    go get -u github.com/philchia/agollo
+    go get -u github.com/philchia/agollo/v2
 ```
 
 ## Usage

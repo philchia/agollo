@@ -21,7 +21,7 @@
 ## 安装
 
 ```sh
-    go get -u github.com/philchia/agollo
+    go get -u github.com/philchia/agollo/v2
 ```
 
 ## 使用
