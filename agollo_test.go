@@ -96,6 +96,12 @@ func TestAgolloStart(t *testing.T) {
 		return
 	}
 
+	releasekey := GetReleaseKey("application")
+	if releasekey != "" {
+		t.Errorf("GetReleaseKey return empty release key")
+		return
+	}
+
 	mockserver.Set("application", "key", "newvalue")
 	select {
 	case <-updates:

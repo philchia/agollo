@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -92,7 +91,6 @@ func (c *Client) Stop() error {
 // fetchAllCinfig fetch from remote, if failed load from local file
 func (c *Client) preload() error {
 	if err := c.longPoller.preload(); err != nil {
-		log.Println("[agollo] err preload:", err)
 		return c.loadLocal(c.getDumpFileName())
 	}
 	return nil
