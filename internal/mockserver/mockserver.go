@@ -4,9 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strings"
+	"path/filepath"
 	"sync"
-	"time"
 )
 
 type notification struct {
@@ -33,12 +32,12 @@ type mockServer struct {
 func (s *mockServer) NotificationHandler(rw http.ResponseWriter, req *http.Request) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	req.ParseForm()
+	_ = req.ParseForm()
 	var notifications []notification
 	if err := json.Unmarshal([]byte(req.FormValue("notifications")), &notifications); err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
+		panic(err)
 	}
+
 	var changes []notification
 	for _, noti := range notifications {
 		if currentID := s.notifications[noti.NamespaceName]; currentID != noti.NotificationID {
@@ -61,8 +60,7 @@ func (s *mockServer) NotificationHandler(rw http.ResponseWriter, req *http.Reque
 func (s *mockServer) ConfigHandler(rw http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 
-	strs := strings.Split(req.RequestURI, "/")
-	var namespace, releaseKey = strings.Split(strs[4], "?")[0], req.FormValue("releaseKey")
+	var namespace, releaseKey = filepath.Base(req.URL.Path), req.FormValue("releaseKey")
 	config := s.Get(namespace)
 
 	var result = result{NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
@@ -142,8 +140,5 @@ func initServer() {
 
 // Close mock server
 func Close() error {
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second))
-	defer cancel()
-
-	return server.server.Shutdown(ctx)
+	return server.server.Shutdown(context.TODO())
 }
