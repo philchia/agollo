@@ -49,11 +49,7 @@ func (s *mockServer) NotificationHandler(rw http.ResponseWriter, req *http.Reque
 		rw.WriteHeader(http.StatusNotModified)
 		return
 	}
-	bts, err := json.Marshal(&changes)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	bts, _ := json.Marshal(&changes)
 	rw.Write(bts)
 }
 
@@ -64,11 +60,7 @@ func (s *mockServer) ConfigHandler(rw http.ResponseWriter, req *http.Request) {
 	config := s.Get(namespace)
 
 	var result = result{NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
-	bts, err := json.Marshal(&result)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	bts, _ := json.Marshal(&result)
 	rw.Write(bts)
 }
 
