@@ -36,10 +36,7 @@ func httpurl(ipOrAddr string) string {
 }
 
 func notificationURL(conf *Conf, notifications string) string {
-	var addr = conf.IP
-	if conf.MetaAddr != "" {
-		addr = conf.MetaAddr
-	}
+	var addr = conf.MetaAddr
 	return fmt.Sprintf("%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
 		httpurl(addr),
 		url.QueryEscape(conf.AppID),
@@ -48,10 +45,7 @@ func notificationURL(conf *Conf, notifications string) string {
 }
 
 func configURL(conf *Conf, namespace, releaseKey string) string {
-	var addr = conf.IP
-	if conf.MetaAddr != "" {
-		addr = conf.MetaAddr
-	}
+	var addr = conf.MetaAddr
 	return fmt.Sprintf("%s/configs/%s/%s/%s?releaseKey=%s&ip=%s",
 		httpurl(addr),
 		url.QueryEscape(conf.AppID),

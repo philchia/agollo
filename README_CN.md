@@ -21,10 +21,15 @@
 ## 安装
 
 ```sh
-    go get -u github.com/philchia/agollo
+    go get -u github.com/philchia/agollo/v3
 ```
 
 ## 使用
+
+### Import agollo
+```golang
+    import github.com/philchia/agollo/v3
+```
 
 ### 使用 app.properties 配置文件启动
 

@@ -12,7 +12,6 @@ type Conf struct {
 	Cluster        string   `json:"cluster,omitempty"`
 	NameSpaceNames []string `json:"namespaceNames,omitempty"`
 	CacheDir       string   `json:"cacheDir,omitempty"`
-	IP             string   `json:"ip,omitempty"`
 	MetaAddr       string   `json:"meta_addr"`
 }
 

@@ -25,10 +25,15 @@
 ## Installation
 
 ```sh
-    go get -u github.com/philchia/agollo
+    go get -u github.com/philchia/agollo/v3
 ```
 
 ## Usage
+
+### Import agollo
+```golang
+    import github.com/philchia/agollo/v3
+```
 
 ### Start use default app.properties config file
 
