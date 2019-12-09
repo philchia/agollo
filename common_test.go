@@ -52,7 +52,7 @@ func TestStrIn(t *testing.T) {
 
 		{
 			slice:  []string{"a", "b", "c"},
-			target: "c",
+			target: "d",
 			ok:     false,
 		},
 	}
