@@ -37,3 +37,29 @@ func TestConfigURL(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestStrIn(t *testing.T) {
+	cases := []struct {
+		slice  []string
+		target string
+		ok     bool
+	}{
+		{
+			slice:  []string{"a", "b", "c"},
+			target: "a",
+			ok:     true,
+		},
+
+		{
+			slice:  []string{"a", "b", "c"},
+			target: "d",
+			ok:     false,
+		},
+	}
+
+	for _, c := range cases {
+		if strIn(c.slice, c.target) != c.ok {
+			t.Fatal("target", c.target, "should be in slice:", c.slice, c.ok)
+		}
+	}
+}

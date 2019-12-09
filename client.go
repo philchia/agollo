@@ -36,6 +36,7 @@ type result struct {
 
 // NewClient create client from conf
 func NewClient(conf *Conf) *Client {
+	conf.normalize()
 	client := &Client{
 		conf:           conf,
 		caches:         newNamespaceCahce(),
