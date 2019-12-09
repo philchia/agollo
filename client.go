@@ -36,7 +36,7 @@ type result struct {
 
 // NewClient create client from conf
 func NewClient(conf *Conf) *Client {
-	normalizeConf(conf)
+	conf.normalize()
 	client := &Client{
 		conf:           conf,
 		caches:         newNamespaceCahce(),
@@ -48,12 +48,6 @@ func NewClient(conf *Conf) *Client {
 	client.longPoller = newLongPoller(conf, longPollInterval, client.handleNamespaceUpdate)
 	client.ctx, client.cancel = context.WithCancel(context.Background())
 	return client
-}
-
-func normalizeConf(conf *Conf) {
-	if !strIn(conf.NameSpaceNames, "application") {
-		conf.NameSpaceNames = append(conf.NameSpaceNames, "application")
-	}
 }
 
 // Start sync config

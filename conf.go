@@ -29,3 +29,9 @@ func NewConf(name string) (*Conf, error) {
 
 	return &ret, nil
 }
+
+func (c *Conf) normalize() {
+	if !strIn(c.NameSpaceNames, defaultNamespace) {
+		c.NameSpaceNames = append(c.NameSpaceNames, defaultNamespace)
+	}
+}
