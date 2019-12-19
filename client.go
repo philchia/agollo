@@ -158,9 +158,9 @@ func (c *Client) GetAllKeys(namespace string) []string {
 }
 
 // sync namespace config
-func (c *Client) sync(namesapce string) (*ChangeEvent, error) {
-	releaseKey := c.GetReleaseKey(namesapce)
-	url := configURL(c.conf, namesapce, releaseKey)
+func (c *Client) sync(namespace string) (*ChangeEvent, error) {
+	releaseKey := c.GetReleaseKey(namespace)
+	url := configURL(c.conf, namespace, releaseKey)
 	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
@@ -216,7 +216,7 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 	c.setReleaseKey(result.NamespaceName, result.ReleaseKey)
 
 	// dump caches to file
-	c.dump(c.getDumpFileName())
+	_ = c.dump(c.getDumpFileName())
 
 	if len(ret.Changes) == 0 {
 		return nil
