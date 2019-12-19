@@ -14,13 +14,13 @@ type notificationRepo struct {
 	notifications sync.Map
 }
 
-func (n *notificationRepo) addNotificationID(namesapce string, notificationID int) bool {
-	_, loaded := n.notifications.LoadOrStore(namesapce, notificationID)
+func (n *notificationRepo) addNotificationID(namespace string, notificationID int) bool {
+	_, loaded := n.notifications.LoadOrStore(namespace, notificationID)
 	return !loaded
 }
 
-func (n *notificationRepo) setNotificationID(namesapce string, notificationID int) {
-	n.notifications.Store(namesapce, notificationID)
+func (n *notificationRepo) setNotificationID(namespace string, notificationID int) {
+	n.notifications.Store(namespace, notificationID)
 }
 
 func (n *notificationRepo) getNotificationID(namespace string) (int, bool) {

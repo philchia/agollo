@@ -37,7 +37,7 @@ func (r *httprequester) request(url string) ([]byte, error) {
 		return ioutil.ReadAll(resp.Body)
 	}
 
-	// Diacard all body if status code is not 200
+	// Discard all body if status code is not 200
 	_, _ = io.Copy(ioutil.Discard, resp.Body)
 	return nil, ErrorStatusNotOK
 }

@@ -75,9 +75,11 @@ func (p *longPoller) addNamespaces(namespaces ...string) error {
 			update = true
 		}
 	}
+
 	if update {
-		p.pumpUpdates()
+		return p.pumpUpdates()
 	}
+
 	return nil
 }
 
@@ -88,7 +90,7 @@ func (p *longPoller) watchUpdates() {
 	for {
 		select {
 		case <-timer.C:
-			p.pumpUpdates()
+			_ = p.pumpUpdates()
 			timer.Reset(p.pollerInterval)
 
 		case <-p.ctx.Done():

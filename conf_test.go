@@ -30,15 +30,15 @@ func TestNewConf(t *testing.T) {
 
 func TestConfNormalize(t *testing.T) {
 	cases := []struct {
-		namesapces []string
+		namespaces []string
 	}{
 		{
-			namesapces: []string{"a", "b"},
+			namespaces: []string{"a", "b"},
 		},
 	}
 
 	for _, c := range cases {
-		conf := &Conf{NameSpaceNames: c.namesapces}
+		conf := &Conf{NameSpaceNames: c.namespaces}
 		conf.normalize()
 		if !strIn(conf.NameSpaceNames, defaultNamespace) {
 			t.Fatal("application should be in conf's namespaces")
