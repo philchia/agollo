@@ -83,7 +83,7 @@ func (a *api) request(method string, url string, body io.Reader) ([]byte, error)
 
 // Envs get all env info
 func (a *api) Envs() ([]*Env, error) {
-	// http://{portal_address}/openapi/v1/apps/AppEasybikeGoGateway/envclusters
+	// http://{portal_address}/openapi/v1/apps/{appId}/envclusters
 	url := fmt.Sprintf("%s/openapi/v1/apps/%s/envclusters", a.portalAddr, a.appid)
 	bts, err := a.request("GET", url, nil)
 	if err != nil {
