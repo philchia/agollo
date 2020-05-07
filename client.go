@@ -37,17 +37,24 @@ type result struct {
 // NewClient create client from conf
 func NewClient(conf *Conf) *Client {
 	conf.normalize()
-	client := &Client{
+	httpClient := &http.Client{Timeout: queryTimeout}
+	agolloClient := &Client{
 		conf:           conf,
 		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
-
-		requester: newHTTPRequester(&http.Client{Timeout: queryTimeout}),
 	}
 
-	client.longPoller = newLongPoller(conf, longPollInterval, client.handleNamespaceUpdate)
-	client.ctx, client.cancel = context.WithCancel(context.Background())
-	return client
+	agolloClient.requester = newHTTPRequester(httpClient)
+	if conf.AccesskeySecret != "" {
+		agolloClient.requester = newHttpSignRequester(
+			newSignature(conf.AppID, conf.AccesskeySecret),
+			httpClient,
+		)
+	}
+
+	agolloClient.longPoller = newLongPoller(conf, longPollInterval, agolloClient.handleNamespaceUpdate)
+	agolloClient.ctx, agolloClient.cancel = context.WithCancel(context.Background())
+	return agolloClient
 }
 
 // Start sync config
