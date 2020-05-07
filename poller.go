@@ -42,10 +42,19 @@ type longPoller struct {
 
 // newLongPoller create a Poller
 func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandler) poller {
+	httpClient := &http.Client{Timeout: longPollTimeout}
+	requester := newHTTPRequester(httpClient)
+	if conf.AccesskeySecret != "" {
+		requester = newHttpSignRequester(
+			newSignature(conf.AppID, conf.AccesskeySecret),
+			httpClient,
+		)
+	}
+
 	poller := &longPoller{
 		conf:           conf,
 		pollerInterval: interval,
-		requester:      newHTTPRequester(&http.Client{Timeout: longPollTimeout}),
+		requester:      requester,
 		notifications:  new(notificationRepo),
 		handler:        handler,
 	}
