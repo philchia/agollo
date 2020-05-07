@@ -49,13 +49,22 @@ func (n *namespaceCache) dump(name string) error {
 		dumps[namespace] = cache.dump()
 	}
 
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	tmp := name + "tmp"
+	f, err := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	return gob.NewEncoder(f).Encode(&dumps)
+	if err := gob.NewEncoder(f).Encode(&dumps); err != nil {
+		_ = f.Close()
+		return err
+	}
+
+	if err := f.Close(); err != nil {
+		return err
+	}
+
+	return os.Rename(tmp, name)
 }
 
 func (n *namespaceCache) load(name string) error {
