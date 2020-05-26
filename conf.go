@@ -7,12 +7,13 @@ import (
 
 // Conf ...
 type Conf struct {
-	AppID           string   `json:"appId,omitempty"`
-	Cluster         string   `json:"cluster,omitempty"`
-	NameSpaceNames  []string `json:"namespaceNames,omitempty"`
-	CacheDir        string   `json:"cacheDir,omitempty"`
-	MetaAddr        string   `json:"meta_addr"`
-	AccesskeySecret string   `json:"accesskey_secret"`
+	AppID              string   `json:"appId,omitempty"`
+	Cluster            string   `json:"cluster,omitempty"`
+	NameSpaceNames     []string `json:"namespaceNames,omitempty"`
+	CacheDir           string   `json:"cacheDir,omitempty"`
+	MetaAddr           string   `json:"meta_addr"`
+	AccesskeySecret    string   `json:"accesskey_secret"`
+	InsecureSkipVerify bool     `json:"insecure_skip_verify"`
 }
 
 // NewConf create Conf from file
