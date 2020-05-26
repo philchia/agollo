@@ -31,21 +31,21 @@ func SubscribeToNamespaces(namespaces ...string) error {
 }
 
 // GetString get value from given namespace
-func GetString(key string, opts ...Option) string {
+func GetString(key string, opts ...OpOption) string {
 	return defaultClient.GetString(key, opts...)
 }
 
 // GetNameSpaceContent get contents of namespace
-func GetContent(opts ...Option) string {
+func GetContent(opts ...OpOption) string {
 	return defaultClient.GetContent(opts...)
 }
 
 // GetAllKeys return all config keys in given namespace
-func GetAllKeys(opts ...Option) []string {
+func GetAllKeys(opts ...OpOption) []string {
 	return defaultClient.GetAllKeys(opts...)
 }
 
 // GetReleaseKey return release key for namespace
-func GetReleaseKey(opts ...Option) string {
+func GetReleaseKey(opts ...OpOption) string {
 	return defaultClient.GetReleaseKey(opts...)
 }

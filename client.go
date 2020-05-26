@@ -20,13 +20,13 @@ type Client interface {
 	OnUpdate(func(*ChangeEvent))
 
 	// Get string value for key
-	GetString(key string, opts ...Option) string
+	GetString(key string, opts ...OpOption) string
 	// GetContent for namespace
-	GetContent(opts ...Option) string
+	GetContent(opts ...OpOption) string
 	// GetAllKeys return all keys
-	GetAllKeys(opts ...Option) []string
+	GetAllKeys(opts ...OpOption) []string
 	// GetReleaseKey return release key for namespace
-	GetReleaseKey(opts ...Option) string
+	GetReleaseKey(opts ...OpOption) string
 	// SubscribeToNamespaces will subscribe to new namespace and keep update
 	SubscribeToNamespaces(namespaces ...string) error
 }
@@ -44,6 +44,8 @@ func defaultOperation() *operation {
 // Client for apollo
 type client struct {
 	conf *Conf
+
+	logger Logger
 
 	caches         *namespaceCache
 	releaseKeyRepo *cache
@@ -69,7 +71,7 @@ type result struct {
 }
 
 // NewClient create client from conf
-func NewClient(conf *Conf) Client {
+func NewClient(conf *Conf, opts ...ClientOption) Client {
 	conf.normalize()
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -80,6 +82,7 @@ func NewClient(conf *Conf) Client {
 
 	agolloClient := &client{
 		conf:           conf,
+		logger:         newLogger(),
 		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
 	}
@@ -94,19 +97,25 @@ func NewClient(conf *Conf) Client {
 
 	agolloClient.longPoller = newLongPoller(conf, longPollInterval, agolloClient.handleNamespaceUpdate)
 	agolloClient.ctx, agolloClient.cancel = context.WithCancel(context.Background())
+
+	for _, opt := range opts {
+		opt(agolloClient)
+	}
 	return agolloClient
 }
 
 // Start sync config
 func (c *client) Start() error {
-
+	c.logger.Infof("start agollo client...")
 	// check cache dir
 	if err := c.autoCreateCacheDir(); err != nil {
+		c.logger.Errorf("fail to create cache dir: %v", err)
 		return err
 	}
 
 	// preload all config to local first
 	if err := c.preload(); err != nil {
+		c.logger.Errorf("fail to preload %v", err)
 		return err
 	}
 
@@ -118,6 +127,7 @@ func (c *client) Start() error {
 
 // handleNamespaceUpdate sync config for namespace, delivery changes to subscriber
 func (c *client) handleNamespaceUpdate(namespace string) error {
+	c.logger.Infof("handle namespace %s update", namespace)
 	change, err := c.sync(namespace)
 	if err != nil || change == nil {
 		return err
@@ -129,9 +139,10 @@ func (c *client) handleNamespaceUpdate(namespace string) error {
 
 // Stop sync config
 func (c *client) Stop() error {
+	c.logger.Infof("stop agollo ...")
 	c.longPoller.stop()
 	c.cancel()
-	c.onUpdate = nil
+	c.OnUpdate(nil)
 	return nil
 }
 
@@ -157,6 +168,7 @@ func (c *client) loadLocal(name string) error {
 
 // dump caches to file
 func (c *client) dump(name string) error {
+	c.logger.Infof("dump config to local file:%s", name)
 	return c.caches.dump(name)
 }
 
@@ -166,11 +178,12 @@ func (c *client) mustGetCache(namespace string) *cache {
 
 // SubscribeToNamespaces fetch namespace config to local and subscribe to updates
 func (c *client) SubscribeToNamespaces(namespaces ...string) error {
+	c.logger.Infof("subscribe to namespace %#v", namespaces)
 	return c.longPoller.addNamespaces(namespaces...)
 }
 
 // GetStringValueWithNameSpace get value from given namespace
-func (c *client) GetString(key string, opts ...Option) string {
+func (c *client) GetString(key string, opts ...OpOption) string {
 	var op = defaultOperation()
 	for _, opt := range opts {
 		opt(op)
@@ -185,12 +198,12 @@ func (c *client) GetString(key string, opts ...Option) string {
 }
 
 // GetNameSpaceContent get contents of namespace
-func (c *client) GetContent(opts ...Option) string {
+func (c *client) GetContent(opts ...OpOption) string {
 	return c.GetString("content", opts...)
 }
 
 // GetAllKeys return all config keys in given namespace
-func (c *client) GetAllKeys(opts ...Option) []string {
+func (c *client) GetAllKeys(opts ...OpOption) []string {
 	var keys []string
 	var op = defaultOperation()
 	for _, opt := range opts {
@@ -209,6 +222,7 @@ func (c *client) GetAllKeys(opts ...Option) []string {
 
 // sync namespace config
 func (c *client) sync(namespace string) (*ChangeEvent, error) {
+	c.logger.Infof("sync namespace %s with remote config server", namespace)
 	releaseKey := c.GetReleaseKey(WithNamespace(namespace))
 	url := configURL(c.conf, namespace, releaseKey)
 	bts, err := c.requester.request(url)
@@ -225,6 +239,7 @@ func (c *client) sync(namespace string) (*ChangeEvent, error) {
 
 // deliveryChangeEvent push change to subscriber
 func (c *client) deliveryChangeEvent(change *ChangeEvent) {
+	c.logger.Infof("delivery update for namespace:%s", change.Namespace)
 	c.onUpdateMtx.Lock()
 	defer c.onUpdateMtx.Unlock()
 
@@ -281,7 +296,7 @@ func (c *client) getDumpFileName() string {
 }
 
 // GetReleaseKey return release key for namespace
-func (c *client) GetReleaseKey(opts ...Option) string {
+func (c *client) GetReleaseKey(opts ...OpOption) string {
 	var op = defaultOperation()
 	for _, opt := range opts {
 		opt(op)
