@@ -8,17 +8,26 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sync"
 )
 
 type Client interface {
+	// Start fetch all config to local cache and run period poll to keep update to remote server
 	Start() error
+	// Stop period poll
 	Stop() error
-	WatchUpdate() <-chan *ChangeEvent
 
+	OnUpdate(func(*ChangeEvent))
+
+	// Get string value for key
 	GetString(key string, opts ...Option) string
+	// GetContent for namespace
 	GetContent(opts ...Option) string
+	// GetAllKeys return all keys
 	GetAllKeys(opts ...Option) []string
+	// GetReleaseKey return release key for namespace
 	GetReleaseKey(opts ...Option) string
+	// SubscribeToNamespaces will subscribe to new namespace and keep update
 	SubscribeToNamespaces(namespaces ...string) error
 }
 
@@ -36,8 +45,6 @@ func defaultOperation() *operation {
 type client struct {
 	conf *Conf
 
-	updateChan chan *ChangeEvent
-
 	caches         *namespaceCache
 	releaseKeyRepo *cache
 
@@ -46,6 +53,10 @@ type client struct {
 
 	ctx    context.Context
 	cancel context.CancelFunc
+
+	// onUpdateMtx guards for onUpdate
+	onUpdateMtx sync.Mutex
+	onUpdate    func(event *ChangeEvent)
 }
 
 // result of query config
@@ -120,9 +131,15 @@ func (c *client) handleNamespaceUpdate(namespace string) error {
 func (c *client) Stop() error {
 	c.longPoller.stop()
 	c.cancel()
-	// close(c.updateChan)
-	c.updateChan = nil
+	c.onUpdate = nil
 	return nil
+}
+
+func (c *client) OnUpdate(handler func(*ChangeEvent)) {
+	c.onUpdateMtx.Lock()
+	defer c.onUpdateMtx.Unlock()
+
+	c.onUpdate = handler
 }
 
 // fetchAllCinfig fetch from remote, if failed load from local file
@@ -141,14 +158,6 @@ func (c *client) loadLocal(name string) error {
 // dump caches to file
 func (c *client) dump(name string) error {
 	return c.caches.dump(name)
-}
-
-// WatchUpdate get all updates
-func (c *client) WatchUpdate() <-chan *ChangeEvent {
-	if c.updateChan == nil {
-		c.updateChan = make(chan *ChangeEvent, 32)
-	}
-	return c.updateChan
 }
 
 func (c *client) mustGetCache(namespace string) *cache {
@@ -216,12 +225,11 @@ func (c *client) sync(namespace string) (*ChangeEvent, error) {
 
 // deliveryChangeEvent push change to subscriber
 func (c *client) deliveryChangeEvent(change *ChangeEvent) {
-	if c.updateChan == nil {
-		return
-	}
-	select {
-	case <-c.ctx.Done():
-	case c.updateChan <- change:
+	c.onUpdateMtx.Lock()
+	defer c.onUpdateMtx.Unlock()
+
+	if c.onUpdate != nil {
+		c.onUpdate(change)
 	}
 }
 
