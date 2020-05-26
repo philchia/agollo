@@ -2,6 +2,7 @@ package agollo
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -37,7 +38,13 @@ type result struct {
 // NewClient create client from conf
 func NewClient(conf *Conf) *Client {
 	conf.normalize()
-	httpClient := &http.Client{Timeout: queryTimeout}
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
+		},
+		Timeout: queryTimeout,
+	}
+
 	agolloClient := &Client{
 		conf:           conf,
 		caches:         newNamespaceCahce(),
