@@ -1,3 +1,3 @@
-module github.com/philchia/agollo/v3
+module github.com/philchia/agollo/v4
 
-go 1.13
+go 1.14
