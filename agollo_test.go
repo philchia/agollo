@@ -66,7 +66,11 @@ func TestAgolloStart(t *testing.T) {
 	}
 
 	mockserver.Set("application", "key", "value")
-	updates := WatchUpdate()
+	updates := make(chan struct{}, 1)
+	defer close(updates)
+	client.OnUpdate(func(event *ChangeEvent) {
+		updates <- struct{}{}
+	})
 
 	select {
 	case <-updates:

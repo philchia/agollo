@@ -20,9 +20,9 @@ func Stop() error {
 	return defaultClient.Stop()
 }
 
-// WatchUpdate get all updates
-func WatchUpdate() <-chan *ChangeEvent {
-	return defaultClient.WatchUpdate()
+// OnUpdate get all updates
+func OnUpdate(handler func(*ChangeEvent)) {
+	defaultClient.OnUpdate(handler)
 }
 
 // SubscribeToNamespaces fetch namespace config to local and subscribe to updates
