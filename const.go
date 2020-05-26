@@ -5,7 +5,6 @@ import (
 )
 
 const (
-	defaultConfName  = "app.properties"
 	defaultNamespace = "application"
 
 	signHttpHeaderAuthorization = "Authorization"

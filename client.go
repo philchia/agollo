@@ -10,8 +10,30 @@ import (
 	"path"
 )
 
+type Client interface {
+	Start() error
+	Stop() error
+	WatchUpdate() <-chan *ChangeEvent
+
+	GetString(key string, opts ...Option) string
+	GetContent(opts ...Option) string
+	GetAllKeys(opts ...Option) []string
+	GetReleaseKey(opts ...Option) string
+	SubscribeToNamespaces(namespaces ...string) error
+}
+
+type operation struct {
+	namespace string
+}
+
+func defaultOperation() *operation {
+	return &operation{
+		namespace: defaultNamespace,
+	}
+}
+
 // Client for apollo
-type Client struct {
+type client struct {
 	conf *Conf
 
 	updateChan chan *ChangeEvent
@@ -36,7 +58,7 @@ type result struct {
 }
 
 // NewClient create client from conf
-func NewClient(conf *Conf) *Client {
+func NewClient(conf *Conf) Client {
 	conf.normalize()
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -45,7 +67,7 @@ func NewClient(conf *Conf) *Client {
 		Timeout: queryTimeout,
 	}
 
-	agolloClient := &Client{
+	agolloClient := &client{
 		conf:           conf,
 		caches:         newNamespaceCahce(),
 		releaseKeyRepo: newCache(),
@@ -65,7 +87,7 @@ func NewClient(conf *Conf) *Client {
 }
 
 // Start sync config
-func (c *Client) Start() error {
+func (c *client) Start() error {
 
 	// check cache dir
 	if err := c.autoCreateCacheDir(); err != nil {
@@ -84,7 +106,7 @@ func (c *Client) Start() error {
 }
 
 // handleNamespaceUpdate sync config for namespace, delivery changes to subscriber
-func (c *Client) handleNamespaceUpdate(namespace string) error {
+func (c *client) handleNamespaceUpdate(namespace string) error {
 	change, err := c.sync(namespace)
 	if err != nil || change == nil {
 		return err
@@ -95,7 +117,7 @@ func (c *Client) handleNamespaceUpdate(namespace string) error {
 }
 
 // Stop sync config
-func (c *Client) Stop() error {
+func (c *client) Stop() error {
 	c.longPoller.stop()
 	c.cancel()
 	// close(c.updateChan)
@@ -104,7 +126,7 @@ func (c *Client) Stop() error {
 }
 
 // fetchAllCinfig fetch from remote, if failed load from local file
-func (c *Client) preload() error {
+func (c *client) preload() error {
 	if err := c.longPoller.preload(); err != nil {
 		return c.loadLocal(c.getDumpFileName())
 	}
@@ -112,55 +134,60 @@ func (c *Client) preload() error {
 }
 
 // loadLocal load caches from local file
-func (c *Client) loadLocal(name string) error {
+func (c *client) loadLocal(name string) error {
 	return c.caches.load(name)
 }
 
 // dump caches to file
-func (c *Client) dump(name string) error {
+func (c *client) dump(name string) error {
 	return c.caches.dump(name)
 }
 
 // WatchUpdate get all updates
-func (c *Client) WatchUpdate() <-chan *ChangeEvent {
+func (c *client) WatchUpdate() <-chan *ChangeEvent {
 	if c.updateChan == nil {
 		c.updateChan = make(chan *ChangeEvent, 32)
 	}
 	return c.updateChan
 }
 
-func (c *Client) mustGetCache(namespace string) *cache {
+func (c *client) mustGetCache(namespace string) *cache {
 	return c.caches.mustGetCache(namespace)
 }
 
 // SubscribeToNamespaces fetch namespace config to local and subscribe to updates
-func (c *Client) SubscribeToNamespaces(namespaces ...string) error {
+func (c *client) SubscribeToNamespaces(namespaces ...string) error {
 	return c.longPoller.addNamespaces(namespaces...)
 }
 
 // GetStringValueWithNameSpace get value from given namespace
-func (c *Client) GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
-	cache := c.mustGetCache(namespace)
-	if ret, ok := cache.get(key); ok && ret != "" {
+func (c *client) GetString(key string, opts ...Option) string {
+	var op = defaultOperation()
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	cache := c.mustGetCache(op.namespace)
+	if ret, ok := cache.get(key); ok {
 		return ret
 	}
-	return defaultValue
-}
 
-// GetStringValue from default namespace
-func (c *Client) GetStringValue(key, defaultValue string) string {
-	return c.GetStringValueWithNameSpace(defaultNamespace, key, defaultValue)
+	return ""
 }
 
 // GetNameSpaceContent get contents of namespace
-func (c *Client) GetNameSpaceContent(namespace, defaultValue string) string {
-	return c.GetStringValueWithNameSpace(namespace, "content", defaultValue)
+func (c *client) GetContent(opts ...Option) string {
+	return c.GetString("content", opts...)
 }
 
 // GetAllKeys return all config keys in given namespace
-func (c *Client) GetAllKeys(namespace string) []string {
+func (c *client) GetAllKeys(opts ...Option) []string {
 	var keys []string
-	cache := c.mustGetCache(namespace)
+	var op = defaultOperation()
+	for _, opt := range opts {
+		opt(op)
+	}
+	cache := c.mustGetCache(op.namespace)
 	cache.kv.Range(func(key, value interface{}) bool {
 		str, ok := key.(string)
 		if ok {
@@ -172,8 +199,8 @@ func (c *Client) GetAllKeys(namespace string) []string {
 }
 
 // sync namespace config
-func (c *Client) sync(namespace string) (*ChangeEvent, error) {
-	releaseKey := c.GetReleaseKey(namespace)
+func (c *client) sync(namespace string) (*ChangeEvent, error) {
+	releaseKey := c.GetReleaseKey(WithNamespace(namespace))
 	url := configURL(c.conf, namespace, releaseKey)
 	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
@@ -188,7 +215,7 @@ func (c *Client) sync(namespace string) (*ChangeEvent, error) {
 }
 
 // deliveryChangeEvent push change to subscriber
-func (c *Client) deliveryChangeEvent(change *ChangeEvent) {
+func (c *client) deliveryChangeEvent(change *ChangeEvent) {
 	if c.updateChan == nil {
 		return
 	}
@@ -199,7 +226,7 @@ func (c *Client) deliveryChangeEvent(change *ChangeEvent) {
 }
 
 // handleResult generate changes from query result, and update local cache
-func (c *Client) handleResult(result *result) *ChangeEvent {
+func (c *client) handleResult(result *result) *ChangeEvent {
 	var ret = ChangeEvent{
 		Namespace: result.NamespaceName,
 		Changes:   map[string]*Change{},
@@ -239,24 +266,28 @@ func (c *Client) handleResult(result *result) *ChangeEvent {
 	return &ret
 }
 
-func (c *Client) getDumpFileName() string {
+func (c *client) getDumpFileName() string {
 	cacheDir := c.conf.CacheDir
 	fileName := fmt.Sprintf(".%s_%s", c.conf.AppID, c.conf.Cluster)
 	return path.Join(cacheDir, fileName)
 }
 
 // GetReleaseKey return release key for namespace
-func (c *Client) GetReleaseKey(namespace string) string {
-	releaseKey, _ := c.releaseKeyRepo.get(namespace)
+func (c *client) GetReleaseKey(opts ...Option) string {
+	var op = defaultOperation()
+	for _, opt := range opts {
+		opt(op)
+	}
+	releaseKey, _ := c.releaseKeyRepo.get(op.namespace)
 	return releaseKey
 }
 
-func (c *Client) setReleaseKey(namespace, releaseKey string) {
+func (c *client) setReleaseKey(namespace, releaseKey string) {
 	c.releaseKeyRepo.set(namespace, releaseKey)
 }
 
 // autoCreateCacheDir autoCreateCacheDir
-func (c *Client) autoCreateCacheDir() error {
+func (c *client) autoCreateCacheDir() error {
 	fs, err := os.Stat(c.conf.CacheDir)
 	if err != nil {
 		if os.IsNotExist(err) {

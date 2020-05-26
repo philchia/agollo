@@ -1,27 +1,17 @@
 package agollo
 
-var (
-	defaultClient *Client
+import (
+	"sync"
 )
 
-// Start agollo
-func Start() error {
-	return StartWithConfFile(defaultConfName)
-}
+var (
+	once          sync.Once
+	defaultClient Client
+)
 
-// StartWithConfFile run agollo with conf file
-func StartWithConfFile(name string) error {
-	conf, err := NewConf(name)
-	if err != nil {
-		return err
-	}
-	return StartWithConf(conf)
-}
-
-// StartWithConf run agollo with Conf
-func StartWithConf(conf *Conf) error {
-	defaultClient = NewClient(conf)
-
+// Start agollo client with Conf, start will block until fetch all config to local
+func Start(conf *Conf) error {
+	once.Do(func() { defaultClient = NewClient(conf) })
 	return defaultClient.Start()
 }
 
@@ -40,27 +30,22 @@ func SubscribeToNamespaces(namespaces ...string) error {
 	return defaultClient.SubscribeToNamespaces(namespaces...)
 }
 
-// GetStringValueWithNameSpace get value from given namespace
-func GetStringValueWithNameSpace(namespace, key, defaultValue string) string {
-	return defaultClient.GetStringValueWithNameSpace(namespace, key, defaultValue)
-}
-
-// GetStringValue from default namespace
-func GetStringValue(key, defaultValue string) string {
-	return GetStringValueWithNameSpace(defaultNamespace, key, defaultValue)
+// GetString get value from given namespace
+func GetString(key string, opts ...Option) string {
+	return defaultClient.GetString(key, opts...)
 }
 
 // GetNameSpaceContent get contents of namespace
-func GetNameSpaceContent(namespace, defaultValue string) string {
-	return defaultClient.GetNameSpaceContent(namespace, defaultValue)
+func GetContent(opts ...Option) string {
+	return defaultClient.GetContent(opts...)
 }
 
 // GetAllKeys return all config keys in given namespace
-func GetAllKeys(namespace string) []string {
-	return defaultClient.GetAllKeys(namespace)
+func GetAllKeys(opts ...Option) []string {
+	return defaultClient.GetAllKeys(opts...)
 }
 
 // GetReleaseKey return release key for namespace
-func GetReleaseKey(namespace string) string {
-	return defaultClient.GetReleaseKey(namespace)
+func GetReleaseKey(opts ...Option) string {
+	return defaultClient.GetReleaseKey(opts...)
 }

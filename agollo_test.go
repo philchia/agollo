@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/philchia/agollo/v3/internal/mockserver"
+	"github.com/philchia/agollo/v4/internal/mockserver"
 )
 
 func TestMain(m *testing.M) {
@@ -32,22 +32,20 @@ func teardown() {
 }
 
 func TestAgolloStart(t *testing.T) {
-	if err := Start(); err == nil {
-		t.Errorf("Start with default app.properties should return err, got :%v", err)
+	conf, err := NewConf("./testdata/app.properties")
+	if err != nil {
+		t.Error(err)
 		return
 	}
 
-	if err := StartWithConfFile("fake.properties"); err == nil {
-		t.Errorf("Start with fake.properties should return err, got :%v", err)
-		return
-	}
-
-	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
+	if err := Start(conf); err != nil {
 		t.Errorf("Start with app.properties should return nil, got :%v", err)
 		return
 	}
 
-	f, err := os.Stat(path.Dir(defaultClient.getDumpFileName()))
+	client := defaultClient.(*client)
+
+	f, err := os.Stat(path.Dir(client.getDumpFileName()))
 	if err != nil {
 		t.Errorf("dump file dir should exists, got err:%v", err)
 		return
@@ -58,20 +56,11 @@ func TestAgolloStart(t *testing.T) {
 		return
 	}
 
-	if err := Stop(); err != nil {
-		t.Errorf("Stop should return nil, got :%v", err)
-		return
-	}
-	os.Remove(defaultClient.getDumpFileName())
-
-	if err := StartWithConfFile("./testdata/app.properties"); err != nil {
-		t.Errorf("Start with app.properties should return nil, got :%v", err)
-		return
-	}
 	defer Stop()
-	defer os.Remove(defaultClient.getDumpFileName())
 
-	if err := defaultClient.loadLocal(defaultClient.getDumpFileName()); err != nil {
+	defer os.Remove(client.getDumpFileName())
+
+	if err := client.loadLocal(client.getDumpFileName()); err != nil {
 		t.Errorf("loadLocal should return nil, got: %v", err)
 		return
 	}
@@ -84,19 +73,19 @@ func TestAgolloStart(t *testing.T) {
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val := GetStringValue("key", "defaultValue")
+	val := GetString("key")
 	if val != "value" {
 		t.Errorf("GetStringValue of key should = value, got %v", val)
 		return
 	}
 
-	keys := GetAllKeys("application")
+	keys := GetAllKeys()
 	if len(keys) != 1 {
 		t.Errorf("GetAllKeys should return 1 key")
 		return
 	}
 
-	releasekey := GetReleaseKey("application")
+	releasekey := GetReleaseKey()
 	if releasekey != "" {
 		t.Errorf("GetReleaseKey return empty release key")
 		return
@@ -108,13 +97,13 @@ func TestAgolloStart(t *testing.T) {
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val = defaultClient.GetStringValue("key", "defaultValue")
+	val = defaultClient.GetString("key")
 	if val != "newvalue" {
 		t.Errorf("GetStringValue of key should = newvalue, got %v", val)
 		return
 	}
 
-	keys = GetAllKeys("application")
+	keys = GetAllKeys()
 	if len(keys) != 1 {
 		t.Errorf("GetAllKeys should return 1 key")
 		return
@@ -126,13 +115,13 @@ func TestAgolloStart(t *testing.T) {
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val = GetStringValue("key", "defaultValue")
-	if val != "defaultValue" {
+	val = GetString("key")
+	if val != "" {
 		t.Errorf("GetStringValue of key should = defaultValue, got %v", val)
 		return
 	}
 
-	keys = GetAllKeys("application")
+	keys = GetAllKeys()
 	if len(keys) != 0 {
 		t.Errorf("GetAllKeys should return 0 key")
 		return
@@ -144,7 +133,7 @@ func TestAgolloStart(t *testing.T) {
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val = GetNameSpaceContent("client.json", "{}")
+	val = GetContent(WithNamespace("client.json"))
 	if val != `{"name":"agollo"}` {
 		t.Errorf(`GetStringValue of client.json content should  = {"name":"agollo"}, got %v`, val)
 		return
@@ -155,13 +144,13 @@ func TestAgolloStart(t *testing.T) {
 		return
 	}
 
-	mockserver.Set("new_namespace.json", "key", "1")
+	mockserver.Set("new_namespace.json", "content", "1")
 	select {
 	case <-updates:
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val = GetStringValueWithNameSpace("new_namespace.json", "key", "defaultValue")
+	val = GetContent(WithNamespace("new_namespace.json"))
 	if val != `1` {
 		t.Errorf(`GetStringValueWithNameSpace of new_namespace.json content should  = 1, got %v`, val)
 		return

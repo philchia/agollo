@@ -16,7 +16,7 @@ func TestNewConf(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "./testdata/" + defaultConfName,
+			name:    "./testdata/app.properties",
 			wantErr: false,
 		},
 	}
