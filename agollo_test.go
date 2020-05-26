@@ -68,7 +68,7 @@ func TestAgolloStart(t *testing.T) {
 	mockserver.Set("application", "key", "value")
 	updates := make(chan struct{}, 1)
 	defer close(updates)
-	client.OnUpdate(func(event *ChangeEvent) {
+	OnUpdate(func(event *ChangeEvent) {
 		updates <- struct{}{}
 	})
 
