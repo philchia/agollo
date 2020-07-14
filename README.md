@@ -2,14 +2,10 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/philchia/agollo)](https://goreportcard.com/report/github.com/philchia/agollo)
 [![codebeat badge](https://codebeat.co/badges/e31b4a09-f531-4b74-a86a-775f46436539)](https://codebeat.co/projects/github-com-philchia-agollo-master)
-[![Coverage Status](https://coveralls.io/repos/github/philchia/agollo/badge.svg?branch=master)](https://coveralls.io/github/philchia/agollo?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/philchia/agollo/badge.svg?branch=v4)](https://coveralls.io/github/philchia/agollo?branch=master)
 [![golang](https://img.shields.io/badge/Language-Go-green.svg?style=flat)](https://golang.org)
 [![GoDoc](https://godoc.org/github.com/philchia/zen?status.svg)](https://godoc.org/github.com/philchia/agollo)
 ![GitHub release](https://img.shields.io/github/release/philchia/agollo.svg)
-
-## Simple chinese
-
-[简体中文](./README_CN.md)
 
 ## Feature
 
@@ -25,54 +21,70 @@
 ## Installation
 
 ```sh
-    go get -u github.com/philchia/agollo/v3
+    go get -u github.com/philchia/agollo/v4
 ```
 
 ## Usage
 
 ### Import agollo
 ```golang
-    import github.com/philchia/agollo/v3
+    import "github.com/philchia/agollo/v4"
 ```
 
-### Start use default app.properties config file
+### In order to use agollo, issue a client or use the built-in default client
 
+
+#### to use the default global client
 ```golang
-    agollo.Start()
+	agollo.Start(&agollo.Conf{
+		AppID:          "your app id",
+		Cluster:        "your cluster",
+		NameSpaceNames: []string{"namespaces you want to subscribe to"},
+		CacheDir:       "",
+		MetaAddr:       "your apollo meta addr",
+	})
 ```
 
-### Start use given config file path
+#### or to issue a new client to embeded into your program
 
 ```golang
-    agollo.StartWithConfFile(name)
+	apollo := agollo.New(&agollo.Conf{
+                         		AppID:          "your app id",
+                         		Cluster:        "your cluster",
+                         		NameSpaceNames: []string{"namespaces you want to subscribe to"},
+                         		CacheDir:       "",
+                         		MetaAddr:       "your apollo meta addr",
+                         	})
+	apollo.Start()
 ```
 
-### Subscribe to updates
+### Set config update callback
 
 ```golang
-    events := agollo.WatchUpdate()
-    changeEvent := <-events
-    bytes, _ := json.Marshal(changeEvent)
-    fmt.Println("event:", string(bytes))
+    agollo.OnUpdate(func(event *ChangeEvent) {
+    // do your business logic to handle config update
+	})
 ```
 
 ### Get apollo values
 
 ```golang
-    agollo.GetStringValue(Key, defaultValue)
-    agollo.GetStringValueWithNameSpace(namespace, key, defaultValue)
+	// get values in the application.properties default namespace
+    val := agollo.GetString(Key)
+    // or indicate a namespace
+    other := agollo.GetString(key, agollo.WithNamespace("other namespace"))
 ```
 
 ### Get namespace file contents
 
 ```golang
-    agollo.GetNameSpaceContent(namespace, defaultValue)
+    namespaceContent := agollo.GetContent(agollo.WithNamespace("other namespace"))
 ```
 
 ### Get all keys
 
 ```golang
-    agollo.GetAllKeys(namespace)
+    allKyes := agollo.GetAllKeys(namespace)
 ```
 
 ### Subscribe to new namespaces
