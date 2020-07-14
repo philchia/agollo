@@ -68,7 +68,6 @@ func (n *namespaceCache) dump(name string) error {
 }
 
 func (n *namespaceCache) load(name string) error {
-	n.drain()
 
 	f, err := os.OpenFile(name, os.O_RDONLY, 0755)
 	if err != nil {
@@ -81,6 +80,8 @@ func (n *namespaceCache) load(name string) error {
 	if err := gob.NewDecoder(f).Decode(&dumps); err != nil {
 		return err
 	}
+
+	n.drain()
 
 	for namespace, kv := range dumps {
 		cache := n.mustGetCache(namespace)
