@@ -223,8 +223,7 @@ func (c *client) GetAllKeys(opts ...OpOption) []string {
 // sync namespace config
 func (c *client) sync(namespace string) (*ChangeEvent, error) {
 	c.logger.Infof("sync namespace %s with remote config server", namespace)
-	releaseKey := c.GetReleaseKey(WithNamespace(namespace))
-	url := configURL(c.conf, namespace, releaseKey)
+	url := configURL(c.conf, namespace, "")
 	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
