@@ -17,3 +17,9 @@ func WithLogger(logger Logger) ClientOption {
 		c.logger = logger
 	}
 }
+
+func SkipLocalCache() ClientOption {
+	return func(c *client) {
+		c.skipLocalCache = true
+	}
+}

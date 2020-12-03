@@ -43,7 +43,8 @@ func defaultOperation() *operation {
 
 // Client for apollo
 type client struct {
-	conf *Conf
+	conf           *Conf
+	skipLocalCache bool
 
 	logger Logger
 
@@ -107,10 +108,12 @@ func NewClient(conf *Conf, opts ...ClientOption) Client {
 // Start sync config
 func (c *client) Start() error {
 	c.logger.Infof("start agollo client...")
-	// check cache dir
-	if err := c.autoCreateCacheDir(); err != nil {
-		c.logger.Errorf("fail to create cache dir: %v", err)
-		return err
+	if !c.skipLocalCache {
+		// check cache dir
+		if err := c.autoCreateCacheDir(); err != nil {
+			c.logger.Errorf("fail to create cache dir: %v", err)
+			return err
+		}
 	}
 
 	// preload all config to local first
@@ -156,6 +159,9 @@ func (c *client) OnUpdate(handler func(*ChangeEvent)) {
 // fetchAllCinfig fetch from remote, if failed load from local file
 func (c *client) preload() error {
 	if err := c.longPoller.preload(); err != nil {
+		if c.skipLocalCache {
+			return err
+		}
 		return c.loadLocal(c.getDumpFileName())
 	}
 	return nil
@@ -168,6 +174,9 @@ func (c *client) loadLocal(name string) error {
 
 // dump caches to file
 func (c *client) dump(name string) error {
+	if c.skipLocalCache {
+		return nil
+	}
 	c.logger.Infof("dump config to local file:%s", name)
 	return c.caches.dump(name)
 }
@@ -228,6 +237,7 @@ func (c *client) sync(namespace string) (*ChangeEvent, error) {
 	if err != nil || len(bts) == 0 {
 		return nil, err
 	}
+
 	var result result
 	if err := json.Unmarshal(bts, &result); err != nil {
 		return nil, err
