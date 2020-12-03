@@ -172,9 +172,9 @@ func (c *Client) GetAllKeys(namespace string) []string {
 }
 
 // sync namespace config
+
 func (c *Client) sync(namespace string) (*ChangeEvent, error) {
-	releaseKey := c.GetReleaseKey(namespace)
-	url := configURL(c.conf, namespace, releaseKey)
+	url := configURL(c.conf, namespace, "")
 	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
