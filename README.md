@@ -4,7 +4,7 @@
 [![codebeat badge](https://codebeat.co/badges/e31b4a09-f531-4b74-a86a-775f46436539)](https://codebeat.co/projects/github-com-philchia-agollo-master)
 [![Coverage Status](https://coveralls.io/repos/github/philchia/agollo/badge.svg?branch=v4)](https://coveralls.io/github/philchia/agollo?branch=master)
 [![golang](https://img.shields.io/badge/Language-Go-green.svg?style=flat)](https://golang.org)
-[![GoDoc](https://godoc.org/github.com/philchia/zen?status.svg)](https://godoc.org/github.com/philchia/agollo)
+[![GoDoc](https://godoc.org/github.com/philchia/agollo?status.svg)](https://pkg.go.dev/github.com/philchia/agollo/v4)
 ![GitHub release](https://img.shields.io/github/release/philchia/agollo.svg)
 
 ## Feature
