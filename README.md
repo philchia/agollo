@@ -84,12 +84,6 @@ other := agollo.GetString(key, agollo.WithNamespace("other namespace"))
 namespaceContent := agollo.GetContent(agollo.WithNamespace("application.properties"))
 ```
 
-### Get properties file contents
-
-```golang
-namespaceContent := agollo.GetPropertiesContent(agollo.WithNamespace("other namespace"))
-```
-
 ### Get all keys
 
 ```golang
