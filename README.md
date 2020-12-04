@@ -37,22 +37,25 @@ import "github.com/philchia/agollo/v4"
 
 
 #### to use the default global client
+
+for namespaces with the format of properties, you need to specific the full name 
+
 ```golang
 agollo.Start(&agollo.Conf{
     AppID:          "your app id",
-    Cluster:        "your cluster",
-    NameSpaceNames: []string{"namespaces you want to subscribe to"},
+    Cluster:        "default",
+    NameSpaceNames: []string{"application.properties"},
     MetaAddr:       "your apollo meta addr",
 })
 ```
 
-#### or to issue a new client to embeded into your program
+#### or to issue a new client to embedded into your program
 
 ```golang
 apollo := agollo.New(&agollo.Conf{
                             AppID:          "your app id",
-                            Cluster:        "your cluster",
-                            NameSpaceNames: []string{"namespaces you want to subscribe to"},
+                            Cluster:        "default",
+                            NameSpaceNames: []string{"application.properties"},
                             MetaAddr:       "your apollo meta addr",
                         })
 apollo.Start()
@@ -76,12 +79,9 @@ other := agollo.GetString(key, agollo.WithNamespace("other namespace"))
 ```
 
 ### Get namespace file contents
-
-**warn: currently GetContent do not support .properties namespace**
-
-**to get .properties namespace content, use GetPropertiesContent**
+**to get namespace of with a format of properties, you need to specific the full name of the namespace, e.g. namespace.properties in both options and configs**
 ```golang
-namespaceContent := agollo.GetContent(agollo.WithNamespace("other namespace"))
+namespaceContent := agollo.GetContent(agollo.WithNamespace("application.properties"))
 ```
 
 ### Get properties file contents
