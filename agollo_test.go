@@ -96,13 +96,13 @@ func TestAgolloStart(t *testing.T) {
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val = defaultClient.GetString("key")
+	val = GetString("key")
 	if val != "newvalue" {
 		t.Errorf("GetStringValue of key should = newvalue, got %v", val)
 		return
 	}
 
-	content := defaultClient.GetPropertiesContent()
+	content := GetPropertiesContent()
 	if content != "key=newvalue\n" {
 		t.Errorf("GetPropertiesContent of application = %s, want %v", content, "key=newvalue\n")
 		return
