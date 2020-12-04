@@ -1,7 +1,6 @@
 package agollo
 
 import (
-	"log"
 	"os"
 	"path"
 	"testing"
@@ -18,13 +17,9 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
-	go func() {
-		if err := mockserver.Run(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	go mockserver.Run()
 	// wait for mock server to run
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 5)
 }
 
 func teardown() {

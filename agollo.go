@@ -40,6 +40,10 @@ func GetContent(opts ...OpOption) string {
 	return defaultClient.GetContent(opts...)
 }
 
+func GetPropertiesContent(opts ...OpOption) string {
+	return defaultClient.GetPropertiesContent(opts...)
+}
+
 // GetAllKeys return all config keys in given namespace
 func GetAllKeys(opts ...OpOption) []string {
 	return defaultClient.GetAllKeys(opts...)

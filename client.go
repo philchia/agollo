@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"sync"
 
 	"github.com/philchia/agollo/v4/internal/properties"
@@ -27,6 +26,8 @@ type Client interface {
 	GetString(key string, opts ...OpOption) string
 	// GetContent for namespace
 	GetContent(opts ...OpOption) string
+	// GetPropertiesContent for properties namespace
+	GetPropertiesContent(opts ...OpOption) string
 	// GetAllKeys return all keys
 	GetAllKeys(opts ...OpOption) []string
 	// GetReleaseKey return release key for namespace
@@ -212,22 +213,24 @@ func (c *client) GetString(key string, opts ...OpOption) string {
 
 // GetNameSpaceContent get contents of namespace
 func (c *client) GetContent(opts ...OpOption) string {
+	return c.GetString("content", opts...)
+}
+
+// GetNameSpaceContent get contents of namespace
+func (c *client) GetPropertiesContent(opts ...OpOption) string {
+	return c.getPropertiesNamespaceContent(opts...)
+}
+
+func (c *client) getPropertiesNamespaceContent(opts ...OpOption) string {
 	var op = defaultOperation()
 	for _, opt := range opts {
 		opt(op)
 	}
-	// get .properties namespace content
-	if !strIn([]string{"json", "yaml", "xml", "txt", "yml"}, filepath.Ext(op.namespace)) {
-		return c.getPropertiesNamespaceContent(opts...)
-	}
 
-	return c.GetString("content", opts...)
-}
-
-func (c *client) getPropertiesNamespaceContent(opts ...OpOption) string {
 	doc := properties.New()
-	for _, key := range c.GetAllKeys(opts...) {
-		doc.Set(key, c.GetString(key, opts...))
+	cache := c.mustGetCache(op.namespace).dump()
+	for key, value := range cache {
+		doc.Set(key, value)
 	}
 
 	var buf bytes.Buffer
