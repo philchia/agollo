@@ -1,6 +1,7 @@
 package agollo
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -9,6 +10,8 @@ import (
 	"os"
 	"path"
 	"sync"
+
+	"github.com/philchia/agollo/v4/internal/properties"
 )
 
 type Client interface {
@@ -23,6 +26,8 @@ type Client interface {
 	GetString(key string, opts ...OpOption) string
 	// GetContent for namespace
 	GetContent(opts ...OpOption) string
+	// GetPropertiesContent for properties namespace
+	GetPropertiesContent(opts ...OpOption) string
 	// GetAllKeys return all keys
 	GetAllKeys(opts ...OpOption) []string
 	// GetReleaseKey return release key for namespace
@@ -209,6 +214,28 @@ func (c *client) GetString(key string, opts ...OpOption) string {
 // GetNameSpaceContent get contents of namespace
 func (c *client) GetContent(opts ...OpOption) string {
 	return c.GetString("content", opts...)
+}
+
+// GetNameSpaceContent get contents of namespace
+func (c *client) GetPropertiesContent(opts ...OpOption) string {
+	return c.getPropertiesNamespaceContent(opts...)
+}
+
+func (c *client) getPropertiesNamespaceContent(opts ...OpOption) string {
+	var op = defaultOperation()
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	doc := properties.New()
+	cache := c.mustGetCache(op.namespace).dump()
+	for key, value := range cache {
+		doc.Set(key, value)
+	}
+
+	var buf bytes.Buffer
+	_ = properties.Save(doc, &buf)
+	return buf.String()
 }
 
 // GetAllKeys return all config keys in given namespace

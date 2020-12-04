@@ -1,7 +1,6 @@
 package agollo
 
 import (
-	"log"
 	"os"
 	"path"
 	"testing"
@@ -18,13 +17,9 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
-	go func() {
-		if err := mockserver.Run(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	go mockserver.Run()
 	// wait for mock server to run
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 5)
 }
 
 func teardown() {
@@ -101,9 +96,15 @@ func TestAgolloStart(t *testing.T) {
 	case <-time.After(time.Millisecond * 30000):
 	}
 
-	val = defaultClient.GetString("key")
+	val = GetString("key")
 	if val != "newvalue" {
 		t.Errorf("GetStringValue of key should = newvalue, got %v", val)
+		return
+	}
+
+	content := GetPropertiesContent()
+	if content != "key=newvalue\n" {
+		t.Errorf("GetPropertiesContent of application = %s, want %v", content, "key=newvalue\n")
 		return
 	}
 
