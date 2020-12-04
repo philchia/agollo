@@ -102,6 +102,12 @@ func TestAgolloStart(t *testing.T) {
 		return
 	}
 
+	content := defaultClient.GetPropertiesContent()
+	if content != "key=newvalue\n" {
+		t.Errorf("GetPropertiesContent of application = %s, want %v", content, "key=newvalue\n")
+		return
+	}
+
 	keys = GetAllKeys()
 	if len(keys) != 1 {
 		t.Errorf("GetAllKeys should return 1 key")
