@@ -40,6 +40,7 @@ func GetContent(opts ...OpOption) string {
 	return defaultClient.GetContent(opts...)
 }
 
+// GetPropertiesContent for properties namespace
 func GetPropertiesContent(opts ...OpOption) string {
 	return defaultClient.GetPropertiesContent(opts...)
 }
