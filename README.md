@@ -79,9 +79,15 @@
 ### Get namespace file contents
 
 **warn: currently GetContent do not support .properties namespace**
-
+**to get .properties namespace content, use GetPropertiesContent**
 ```golang
     namespaceContent := agollo.GetContent(agollo.WithNamespace("other namespace"))
+```
+
+### Get properties file contents
+
+```golang
+    namespaceContent := agollo.GetPropertiesContent(agollo.WithNamespace("other namespace"))
 ```
 
 ### Get all keys
