@@ -22,14 +22,14 @@
 ## Installation
 
 ```sh
-    go get -u github.com/philchia/agollo/v4
+go get -u github.com/philchia/agollo/v4
 ```
 
 ## Usage
 
 ### Import agollo
 ```golang
-    import "github.com/philchia/agollo/v4"
+import "github.com/philchia/agollo/v4"
 ```
 
 ### In order to use agollo, issue a client or use the built-in default client
@@ -37,43 +37,43 @@
 
 #### to use the default global client
 ```golang
-	agollo.Start(&agollo.Conf{
-		AppID:          "your app id",
-		Cluster:        "your cluster",
-		NameSpaceNames: []string{"namespaces you want to subscribe to"},
-		CacheDir:       "",
-		MetaAddr:       "your apollo meta addr",
-	})
+agollo.Start(&agollo.Conf{
+    AppID:          "your app id",
+    Cluster:        "your cluster",
+    NameSpaceNames: []string{"namespaces you want to subscribe to"},
+    CacheDir:       "",
+    MetaAddr:       "your apollo meta addr",
+})
 ```
 
 #### or to issue a new client to embeded into your program
 
 ```golang
-	apollo := agollo.New(&agollo.Conf{
-                         		AppID:          "your app id",
-                         		Cluster:        "your cluster",
-                         		NameSpaceNames: []string{"namespaces you want to subscribe to"},
-                         		CacheDir:       "",
-                         		MetaAddr:       "your apollo meta addr",
-                         	})
-	apollo.Start()
+apollo := agollo.New(&agollo.Conf{
+                            AppID:          "your app id",
+                            Cluster:        "your cluster",
+                            NameSpaceNames: []string{"namespaces you want to subscribe to"},
+                            CacheDir:       "",
+                            MetaAddr:       "your apollo meta addr",
+                        })
+apollo.Start()
 ```
 
 ### Set config update callback
 
 ```golang
-    agollo.OnUpdate(func(event *ChangeEvent) {
+agollo.OnUpdate(func(event *ChangeEvent) {
     // do your business logic to handle config update
-	})
+})
 ```
 
 ### Get apollo values
 
 ```golang
-	// get values in the application.properties default namespace
-    val := agollo.GetString(Key)
-    // or indicate a namespace
-    other := agollo.GetString(key, agollo.WithNamespace("other namespace"))
+// get values in the application.properties default namespace
+val := agollo.GetString(Key)
+// or indicate a namespace
+other := agollo.GetString(key, agollo.WithNamespace("other namespace"))
 ```
 
 ### Get namespace file contents
@@ -81,25 +81,25 @@
 **warn: currently GetContent do not support .properties namespace**
 **to get .properties namespace content, use GetPropertiesContent**
 ```golang
-    namespaceContent := agollo.GetContent(agollo.WithNamespace("other namespace"))
+namespaceContent := agollo.GetContent(agollo.WithNamespace("other namespace"))
 ```
 
 ### Get properties file contents
 
 ```golang
-    namespaceContent := agollo.GetPropertiesContent(agollo.WithNamespace("other namespace"))
+namespaceContent := agollo.GetPropertiesContent(agollo.WithNamespace("other namespace"))
 ```
 
 ### Get all keys
 
 ```golang
-    allKyes := agollo.GetAllKeys(namespace)
+allKyes := agollo.GetAllKeys(namespace)
 ```
 
 ### Subscribe to new namespaces
 
 ```golang
-    agollo.SubscribeToNamespaces("newNamespace1", "newNamespace2")
+agollo.SubscribeToNamespaces("newNamespace1", "newNamespace2")
 ```
 
 ## License
