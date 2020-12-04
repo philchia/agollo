@@ -14,10 +14,11 @@
 * Fail tolerant
 * Zero dependency
 * Realtime change notification
+* API to get contents of namespace
 
 ## Required
 
-**go 1.9** or later
+**go 1.11** or later
 
 ## Installation
 
@@ -41,7 +42,6 @@ agollo.Start(&agollo.Conf{
     AppID:          "your app id",
     Cluster:        "your cluster",
     NameSpaceNames: []string{"namespaces you want to subscribe to"},
-    CacheDir:       "",
     MetaAddr:       "your apollo meta addr",
 })
 ```
@@ -53,7 +53,6 @@ apollo := agollo.New(&agollo.Conf{
                             AppID:          "your app id",
                             Cluster:        "your cluster",
                             NameSpaceNames: []string{"namespaces you want to subscribe to"},
-                            CacheDir:       "",
                             MetaAddr:       "your apollo meta addr",
                         })
 apollo.Start()
