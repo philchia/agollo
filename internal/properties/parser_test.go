@@ -63,7 +63,6 @@ func TestSave(t *testing.T) {
 			wantErr:     false,
 			wantContent: "timeout=10\n",
 		},
-
 		{
 			name: "case2",
 			args: args{
@@ -74,7 +73,6 @@ func TestSave(t *testing.T) {
 			wantErr:     false,
 			wantContent: "timeout\\==10\n",
 		},
-
 		{
 			name: "case3",
 			args: args{
@@ -83,7 +81,17 @@ func TestSave(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			wantContent: "timeout\\==\\=10\n",
+			wantContent: "timeout\\===10\n",
+		},
+		{
+			name: "case4",
+			args: args{
+				kv: map[string]string{
+					"timeout= ": " =10",
+				},
+			},
+			wantErr:     false,
+			wantContent: "timeout\\=\\ =\\ =10\n",
 		},
 	}
 	for _, tt := range tests {
@@ -100,6 +108,72 @@ func TestSave(t *testing.T) {
 			}
 			if gotWriter := writer.String(); gotWriter != tt.wantContent {
 				t.Errorf("Save() gotContent = %v, want %v", gotWriter, tt.wantContent)
+			}
+		})
+	}
+}
+
+func TestEscapeKey(t *testing.T) {
+	type args struct {
+		value string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "case1",
+			args: args{
+				value: "jdbc.url=jdbc:mysql",
+			},
+			want: "jdbc.url\\=jdbc\\:mysql",
+		},
+		{
+			name: "case2",
+			args: args{
+				value: "jdbc.url = jdbc:mysql",
+			},
+			want: "jdbc.url\\ \\=\\ jdbc\\:mysql",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := escapeKey(tt.args.value); got != tt.want {
+				t.Errorf("escape() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEscapeValue(t *testing.T) {
+	type args struct {
+		value string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "case1",
+			args: args{
+				value: "jdbc.url=jdbc:mysql",
+			},
+			want: "jdbc.url=jdbc:mysql",
+		},
+		{
+			name: "case2",
+			args: args{
+				value: "jdbc.url = jdbc:mysql",
+			},
+			want: "jdbc.url\\ =\\ jdbc:mysql",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := escapeValue(tt.args.value); got != tt.want {
+				t.Errorf("escape() = %v, want %v", got, tt.want)
 			}
 		})
 	}

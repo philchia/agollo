@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	defaultNamespace = "application"
-
+	defaultNamespace            = "application.properties"
+	defaultCluster              = "default"
+	propertiesSuffix            = ".properties"
 	signHttpHeaderAuthorization = "Authorization"
 	signHttpHeaderTimestamp     = "Timestamp"
 	signAuthorizationFormat     = "Apollo %s:%s"

@@ -40,7 +40,7 @@ func Save(doc *Document, writer io.Writer) error {
 		case '#', '!', ' ':
 			_, err = fmt.Fprintln(writer, value)
 		case '=', ':':
-			_, err = fmt.Fprintf(writer, "%s%c%s\n", escape(key), typo, escape(value))
+			_, err = fmt.Fprintf(writer, "%s%c%s\n", escapeKey(key), typo, escapeValue(value))
 		}
 
 		return nil == err
@@ -91,7 +91,12 @@ func (p *Document) Accept(f func(typo byte, value string, key string) bool) {
 	}
 }
 
-func escape(value string) string {
-	replacer := strings.NewReplacer("=", "\\=", ":", "\\:")
+func escapeKey(value string) string {
+	replacer := strings.NewReplacer("=", "\\=", ":", "\\:", " ", "\\ ", "\\", "\\\\")
+	return replacer.Replace(value)
+}
+
+func escapeValue(value string) string {
+	replacer := strings.NewReplacer(" ", "\\ ", "\\", "\\\\")
 	return replacer.Replace(value)
 }

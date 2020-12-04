@@ -33,7 +33,12 @@ func NewConf(name string) (*Conf, error) {
 }
 
 func (c *Conf) normalize() {
-	if !strIn(c.NameSpaceNames, defaultNamespace) {
+	if c.Cluster == "" {
+		c.Cluster = defaultCluster
+	}
+
+	if !strIn(c.NameSpaceNames, defaultNamespace) &&
+		!strIn(c.NameSpaceNames, nomalizeNamespace(defaultNamespace)) {
 		c.NameSpaceNames = append(c.NameSpaceNames, defaultNamespace)
 	}
 }

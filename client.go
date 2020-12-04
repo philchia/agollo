@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"sync"
 
 	"github.com/philchia/agollo/v4/internal/properties"
@@ -187,7 +188,7 @@ func (c *client) dump(name string) error {
 }
 
 func (c *client) mustGetCache(namespace string) *cache {
-	return c.caches.mustGetCache(namespace)
+	return c.caches.mustGetCache(nomalizeNamespace(namespace))
 }
 
 // SubscribeToNamespaces fetch namespace config to local and subscribe to updates
@@ -213,6 +214,14 @@ func (c *client) GetString(key string, opts ...OpOption) string {
 
 // GetNameSpaceContent get contents of namespace
 func (c *client) GetContent(opts ...OpOption) string {
+	var op = defaultOperation()
+	for _, opt := range opts {
+		opt(op)
+	}
+	if strings.HasSuffix(op.namespace, propertiesSuffix) {
+		return c.getPropertiesNamespaceContent(opts...)
+	}
+
 	return c.GetString("content", opts...)
 }
 
