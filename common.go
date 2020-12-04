@@ -35,6 +35,10 @@ func httpurl(ipOrAddr string) string {
 	return fmt.Sprintf("http://%s", ipOrAddr)
 }
 
+func nomalizeNamespace(namespace string) string {
+	return strings.TrimSuffix(namespace, propertiesSuffix)
+}
+
 func notificationURL(conf *Conf, notifications string) string {
 	var addr = conf.MetaAddr
 	return fmt.Sprintf("%s/notifications/v2?appId=%s&cluster=%s&notifications=%s",
@@ -50,7 +54,7 @@ func configURL(conf *Conf, namespace, releaseKey string) string {
 		httpurl(addr),
 		url.QueryEscape(conf.AppID),
 		url.QueryEscape(conf.Cluster),
-		url.QueryEscape(namespace),
+		url.QueryEscape(nomalizeNamespace(namespace)),
 		releaseKey,
 		getLocalIP())
 }

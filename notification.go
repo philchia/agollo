@@ -15,16 +15,16 @@ type notificationRepo struct {
 }
 
 func (n *notificationRepo) addNotificationID(namespace string, notificationID int) bool {
-	_, loaded := n.notifications.LoadOrStore(namespace, notificationID)
+	_, loaded := n.notifications.LoadOrStore(nomalizeNamespace(namespace), notificationID)
 	return !loaded
 }
 
 func (n *notificationRepo) setNotificationID(namespace string, notificationID int) {
-	n.notifications.Store(namespace, notificationID)
+	n.notifications.Store(nomalizeNamespace(namespace), notificationID)
 }
 
 func (n *notificationRepo) getNotificationID(namespace string) (int, bool) {
-	if val, ok := n.notifications.Load(namespace); ok {
+	if val, ok := n.notifications.Load(nomalizeNamespace(namespace)); ok {
 		if ret, ok := val.(int); ok {
 			return ret, true
 		}
@@ -39,7 +39,7 @@ func (n *notificationRepo) toString() string {
 		k, _ := key.(string)
 		v, _ := val.(int)
 		notifications = append(notifications, &notification{
-			NamespaceName:  k,
+			NamespaceName:  nomalizeNamespace(k),
 			NotificationID: v,
 		})
 
