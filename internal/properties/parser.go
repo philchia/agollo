@@ -2,7 +2,6 @@
 package properties
 
 import (
-	"container/list"
 	"fmt"
 	"io"
 	"strings"
@@ -21,8 +20,7 @@ type element struct {
 
 // Document The properties document in memory.
 type Document struct {
-	elements *list.List
-	props    map[string]*list.Element
+	props map[string]*element
 }
 
 // New is used to create a new and empty properties document.
@@ -30,8 +28,7 @@ type Document struct {
 // It's used to generate a new document.
 func New() *Document {
 	doc := new(Document)
-	doc.elements = list.New()
-	doc.props = make(map[string]*list.Element)
+	doc.props = make(map[string]*element)
 	return doc
 }
 
@@ -61,7 +58,7 @@ func (p *Document) Get(key string) (value string, exist bool) {
 		return "", ok
 	}
 
-	return e.Value.(*element).value, ok
+	return e.value, ok
 }
 
 // Set Update the value of the item of the key.
@@ -70,11 +67,11 @@ func (p *Document) Get(key string) (value string, exist bool) {
 func (p *Document) Set(key string, value string) {
 	e, ok := p.props[key]
 	if !ok {
-		p.props[key] = p.elements.PushBack(&element{typo: '=', key: key, value: value})
+		p.props[key] = &element{typo: '=', key: key, value: value}
 		return
 	}
 
-	e.Value.(*element).value = value
+	e.value = value
 	return
 }
 
@@ -86,26 +83,10 @@ func (p *Document) Set(key string, value string) {
 // If typo is '=' or ':' means current element is a key-value pair.
 // The traverse will be terminated if f return false.
 func (p *Document) Accept(f func(typo byte, value string, key string) bool) {
-	for e := p.elements.Front(); e != nil; e = e.Next() {
-		elem := e.Value.(*element)
+	for _, elem := range p.props {
 		continues := f(elem.typo, elem.value, elem.key)
 		if !continues {
 			return
-		}
-	}
-}
-
-// Foreach Traverse all of the key-value pairs in the document.
-// The traverse will be terminated if f return false.
-func (p *Document) Foreach(f func(value string, key string) bool) {
-	for e := p.elements.Front(); e != nil; e = e.Next() {
-		elem := e.Value.(*element)
-		if ('=' == elem.typo) ||
-			(':' == elem.typo) {
-			continues := f(elem.value, elem.key)
-			if !continues {
-				return
-			}
 		}
 	}
 }
