@@ -37,3 +37,39 @@ func TestMakeAddChange(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestChangeEvent_String(t *testing.T) {
+	type fields struct {
+		Namespace string
+		Changes   map[string]*Change
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "case1",
+			fields: fields{
+				Namespace: "application",
+				Changes: map[string]*Change{
+					"key": {
+						Key:        "key",
+						ChangeType: ADD,
+						NewValue:   "value",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &ChangeEvent{
+				Namespace: tt.fields.Namespace,
+				Changes:   tt.fields.Changes,
+			}
+			got := e.String()
+			t.Log(got)
+		})
+	}
+}
