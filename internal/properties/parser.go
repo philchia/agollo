@@ -37,8 +37,6 @@ func Save(doc *Document, writer io.Writer) error {
 	var err error
 	doc.Accept(func(typo byte, value string, key string) bool {
 		switch typo {
-		case '#', '!', ' ':
-			_, err = fmt.Fprintln(writer, value)
 		case '=', ':':
 			_, err = fmt.Fprintf(writer, "%s%c%s\n", escapeKey(key), typo, escapeValue(value))
 		}
