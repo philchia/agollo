@@ -50,7 +50,7 @@ func (n *namespaceCache) dump(name string) error {
 	}
 
 	tmp := name + "tmp"
-	f, err := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	f, err := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
