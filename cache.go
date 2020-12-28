@@ -11,7 +11,7 @@ type namespaceCache struct {
 	caches map[string]*cache
 }
 
-func newNamespaceCahce() *namespaceCache {
+func newNamespaceCache() *namespaceCache {
 	return &namespaceCache{
 		caches: map[string]*cache{},
 	}

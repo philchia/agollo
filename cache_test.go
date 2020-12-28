@@ -31,7 +31,7 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheDump(t *testing.T) {
-	var caches = newNamespaceCahce()
+	var caches = newNamespaceCache()
 	defer caches.drain()
 	caches.mustGetCache("namespace").set("key", "val")
 
@@ -46,7 +46,7 @@ func TestCacheDump(t *testing.T) {
 		t.Error(err)
 	}
 
-	var restore = newNamespaceCahce()
+	var restore = newNamespaceCache()
 	defer restore.drain()
 	if err := restore.load(f.Name()); err != nil {
 		t.Error(err)
