@@ -90,7 +90,7 @@ func NewClient(conf *Conf, opts ...ClientOption) Client {
 	agolloClient := &client{
 		conf:           conf,
 		logger:         newLogger(),
-		caches:         newNamespaceCahce(),
+		caches:         newNamespaceCache(),
 		releaseKeyRepo: newCache(),
 	}
 
