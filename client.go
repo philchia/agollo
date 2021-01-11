@@ -162,12 +162,13 @@ func (c *client) OnUpdate(handler func(*ChangeEvent)) {
 	c.onUpdate = handler
 }
 
-// fetchAllCinfig fetch from remote, if failed load from local file
+// fetchAllConfig fetch from remote, if failed load from local file
 func (c *client) preload() error {
 	if err := c.longPoller.preload(); err != nil {
 		if c.skipLocalCache {
 			return err
 		}
+		c.logger.Errorf("preload from remote error : %v", err)
 		return c.loadLocal(c.getDumpFileName())
 	}
 	return nil
