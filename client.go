@@ -168,7 +168,7 @@ func (c *client) preload() error {
 		if c.skipLocalCache {
 			return err
 		}
-		c.logger.Errorf("preload from remote error : %v", err)
+		c.logger.Infof("preload from remote error : %v", err)
 		return c.loadLocal(c.getDumpFileName())
 	}
 	return nil
