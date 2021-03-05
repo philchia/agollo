@@ -357,6 +357,10 @@ func (c *client) setReleaseKey(namespace, releaseKey string) {
 
 // autoCreateCacheDir autoCreateCacheDir
 func (c *client) autoCreateCacheDir() error {
+	if c.conf.CacheDir == "" {
+		return nil
+	}
+
 	fs, err := os.Stat(c.conf.CacheDir)
 	if err != nil {
 		if os.IsNotExist(err) {
