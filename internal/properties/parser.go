@@ -95,6 +95,6 @@ func escapeKey(value string) string {
 }
 
 func escapeValue(value string) string {
-	replacer := strings.NewReplacer(" ", "\\ ", "\\", "\\\\")
+	replacer := strings.NewReplacer(" ", "\\ ", "\\", "\\\\", "\n", "\\n")
 	return replacer.Replace(value)
 }

@@ -169,6 +169,13 @@ func TestEscapeValue(t *testing.T) {
 			},
 			want: "jdbc.url\\ =\\ jdbc:mysql",
 		},
+		{
+			name: "escape multiline value",
+			args: args{
+				value: "line1\nline2",
+			},
+			want: "line1\\nline2",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
