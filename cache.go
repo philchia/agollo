@@ -39,7 +39,7 @@ func (n *namespaceCache) drain() {
 	}
 }
 
-func (n *namespaceCache) dump(name string) error {
+func (n *namespaceCache) cacheDump() map[string]map[string]string {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
@@ -48,7 +48,12 @@ func (n *namespaceCache) dump(name string) error {
 	for namespace, cache := range n.caches {
 		dumps[namespace] = cache.dump()
 	}
+	return dumps
+}
 
+func (n *namespaceCache) dump(name string) error {
+
+	dumps := n.cacheDump()
 	tmp := name + "tmp"
 	f, err := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
