@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestRequest(t *testing.T) {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}))
 	bts, err = request.request(serv.URL)
-	if err != nil && err != ErrorStatusNotOK {
+	if err != nil && !strings.Contains(err.Error(), "apollo return http resp code") {
 		t.Error(err)
 	}
 
@@ -67,7 +68,7 @@ func TestRequestWithSign(t *testing.T) {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}))
 	bts, err = request.request(serv.URL)
-	if err != nil && err != ErrorStatusNotOK {
+	if err != nil && !strings.Contains(err.Error(), "apollo return http resp code") {
 		t.Error(err)
 	}
 
