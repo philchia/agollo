@@ -8,7 +8,7 @@ import (
 )
 
 func TestRequest(t *testing.T) {
-	request := newHTTPRequester(&http.Client{})
+	request := newHTTPRequester(&http.Client{}, 3)
 
 	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte("test"))
@@ -46,7 +46,7 @@ func TestRequest(t *testing.T) {
 }
 
 func TestRequestWithSign(t *testing.T) {
-	request := newHttpSignRequester(newSignature("appid", "secret"), &http.Client{})
+	request := newHttpSignRequester(newSignature("appid", "secret"), &http.Client{}, 3)
 
 	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		auth := req.Header.Get(signHttpHeaderAuthorization)

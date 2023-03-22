@@ -11,6 +11,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/philchia/agollo/v4/internal/properties"
 )
@@ -84,7 +85,7 @@ func NewClient(conf *Conf, opts ...ClientOption) Client {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
 		},
-		Timeout: queryTimeout,
+		Timeout: time.Millisecond * time.Duration(conf.SyncTimeout),
 	}
 
 	agolloClient := &client{
@@ -94,11 +95,12 @@ func NewClient(conf *Conf, opts ...ClientOption) Client {
 		releaseKeyRepo: newCache(),
 	}
 
-	agolloClient.requester = newHTTPRequester(httpClient)
+	agolloClient.requester = newHTTPRequester(httpClient, conf.Retry)
 	if conf.AccesskeySecret != "" {
 		agolloClient.requester = newHttpSignRequester(
 			newSignature(conf.AppID, conf.AccesskeySecret),
 			httpClient,
+			conf.Retry,
 		)
 	}
 
@@ -169,7 +171,10 @@ func (c *client) preload() error {
 			return err
 		}
 		c.logger.Infof("preload from remote error : %v", err)
-		return c.loadLocal(c.getDumpFileName())
+		err2 := c.loadLocal(c.getDumpFileName())
+		if err2 != nil {
+			return fmt.Errorf("preload from server error [%s], then load local error [%s]", err, err2)
+		}
 	}
 	return nil
 }

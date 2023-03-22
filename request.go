@@ -19,18 +19,27 @@ type requester interface {
 }
 
 type httpRequester struct {
-	client *http.Client
+	client  *http.Client
+	retries int
 }
 
-func newHTTPRequester(client *http.Client) requester {
+func newHTTPRequester(client *http.Client, retries int) requester {
 	return &httpRequester{
-		client: client,
+		client:  client,
+		retries: retries,
 	}
 }
 
 func (r *httpRequester) request(url string) ([]byte, error) {
+	return r.requestWithRetry(url, r.retries)
+}
+
+func (r *httpRequester) requestWithRetry(url string, retries int) ([]byte, error) {
 	resp, err := r.client.Get(url)
 	if err != nil {
+		if retries > 0 {
+			return r.requestWithRetry(url, retries-1)
+		}
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -41,24 +50,34 @@ func (r *httpRequester) request(url string) ([]byte, error) {
 
 	// Discard all body if status code is not 200
 	_, _ = io.Copy(ioutil.Discard, resp.Body)
-	return nil, ErrorStatusNotOK
+	return nil, fmt.Errorf("apollo return http resp code %d", resp.StatusCode)
 }
 
 type httpSignRequester struct {
 	signature *signature
 	client    *http.Client
+	retries   int
 }
 
-func newHttpSignRequester(signature *signature, client *http.Client) requester {
+func newHttpSignRequester(signature *signature, client *http.Client, retries int) requester {
 	return &httpSignRequester{
 		signature: signature,
 		client:    client,
+		retries:   retries,
 	}
 }
 
 func (r *httpSignRequester) request(url string) ([]byte, error) {
+	return r.requestWithRetry(url, r.retries)
+}
+
+func (r *httpSignRequester) requestWithRetry(url string, retries int) ([]byte, error) {
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
+		if retries > 0 {
+			return r.requestWithRetry(url, retries-1)
+		}
 		return nil, err
 	}
 
@@ -82,5 +101,5 @@ func (r *httpSignRequester) request(url string) ([]byte, error) {
 
 	// Discard all body if status code is not 200
 	_, _ = io.Copy(ioutil.Discard, resp.Body)
-	return nil, ErrorStatusNotOK
+	return nil, fmt.Errorf("apollo return http resp code %d", resp.StatusCode)
 }
