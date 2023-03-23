@@ -50,6 +50,6 @@ func (c *Conf) normalize() {
 	}
 
 	if c.PollTimeout == 0 {
-		c.SyncTimeout = 90000
+		c.PollTimeout = 90000
 	}
 }
