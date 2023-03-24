@@ -75,9 +75,6 @@ func (r *httpSignRequester) requestWithRetry(url string, retries int) ([]byte, e
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		if retries > 0 {
-			return r.requestWithRetry(url, retries-1)
-		}
 		return nil, err
 	}
 
@@ -91,6 +88,9 @@ func (r *httpSignRequester) requestWithRetry(url string, retries int) ([]byte, e
 
 	resp, err := r.client.Do(req)
 	if err != nil {
+		if retries > 0 {
+			return r.requestWithRetry(url, retries-1)
+		}
 		return nil, err
 	}
 	defer resp.Body.Close()

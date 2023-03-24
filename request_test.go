@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestRequest(t *testing.T) {
@@ -83,5 +85,54 @@ func TestRequestWithSign(t *testing.T) {
 	_, err = request.request(serv.URL)
 	if err == nil {
 		t.FailNow()
+	}
+}
+
+func TestRequestWithRetry(t *testing.T) {
+	var retries int64 = 3
+	request := newHTTPRequester(&http.Client{Timeout: time.Millisecond}, int(retries))
+
+	done := make(chan struct{})
+	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		atomic.AddInt64(&retries, -1)
+		<-done
+	}))
+	_, err := request.request(serv.URL)
+	if err == nil {
+		t.Errorf("request must be error")
+	}
+
+	// wait close
+	done <- struct{}{}
+	close(done)
+
+	// retry three times, equal query server four times.
+	if retries != -1 {
+		t.Errorf("must retry three times")
+	}
+}
+
+func TestRequestWithSignWithRetry(t *testing.T) {
+	var retries int64 = 3
+	request := newHttpSignRequester(newSignature("appid", "secret"), &http.Client{Timeout: time.Millisecond}, int(retries))
+
+	done := make(chan struct{})
+	serv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		atomic.AddInt64(&retries, -1)
+		<-done
+	}))
+
+	_, err := request.request(serv.URL)
+	if err == nil {
+		t.Errorf("request must be error")
+	}
+
+	// wait close
+	done <- struct{}{}
+	close(done)
+
+	// retry three times, equal query server four times.
+	if retries != -1 {
+		t.Errorf("must retry three times")
 	}
 }
