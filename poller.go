@@ -44,16 +44,17 @@ type longPoller struct {
 // newLongPoller create a Poller
 func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandler) poller {
 	httpClient := &http.Client{
-		Timeout: longPollTimeout,
+		Timeout: time.Millisecond * time.Duration(conf.PollTimeout),
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
 		},
 	}
-	requester := newHTTPRequester(httpClient)
+	requester := newHTTPRequester(httpClient, conf.Retry)
 	if conf.AccesskeySecret != "" {
 		requester = newHttpSignRequester(
 			newSignature(conf.AppID, conf.AccesskeySecret),
 			httpClient,
+			conf.Retry,
 		)
 	}
 

@@ -14,6 +14,9 @@ type Conf struct {
 	MetaAddr           string   `json:"meta_addr,omitempty"`
 	AccesskeySecret    string   `json:"accesskey_secret,omitempty"`
 	InsecureSkipVerify bool     `json:"insecure_skip_verify,omitempty"`
+	Retry              int      `json:"retry,omitempty"`        // retry count. 0 means no retry
+	SyncTimeout        int64    `json:"sync_timeout,omitempty"` // sync request timeout, unit:ms
+	PollTimeout        int64    `json:"poll_timeout,omitempty"` // poll request timeout, unit:ms
 }
 
 // NewConf create Conf from file
@@ -40,5 +43,13 @@ func (c *Conf) normalize() {
 	if !strIn(c.NameSpaceNames, defaultNamespace) &&
 		!strIn(c.NameSpaceNames, nomalizeNamespace(defaultNamespace)) {
 		c.NameSpaceNames = append(c.NameSpaceNames, defaultNamespace)
+	}
+
+	if c.SyncTimeout == 0 {
+		c.SyncTimeout = 2000
+	}
+
+	if c.PollTimeout == 0 {
+		c.PollTimeout = 90000
 	}
 }
