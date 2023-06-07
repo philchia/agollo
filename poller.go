@@ -2,7 +2,6 @@ package agollo
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"net/http"
 	"sync/atomic"
@@ -44,10 +43,8 @@ type longPoller struct {
 // newLongPoller create a Poller
 func newLongPoller(conf *Conf, interval time.Duration, handler notificationHandler) poller {
 	httpClient := &http.Client{
-		Timeout: time.Millisecond * time.Duration(conf.PollTimeout),
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
-		},
+		Timeout:   time.Millisecond * time.Duration(conf.PollTimeout),
+		Transport: getDefaultTransport(conf.InsecureSkipVerify),
 	}
 	requester := newHTTPRequester(httpClient, conf.Retry)
 	if conf.AccesskeySecret != "" {
