@@ -81,11 +81,12 @@ type result struct {
 // NewClient create client from conf
 func NewClient(conf *Conf, opts ...ClientOption) Client {
 	conf.normalize()
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
+	}
 	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
-		},
-		Timeout: time.Millisecond * time.Duration(conf.SyncTimeout),
+		Timeout:   time.Millisecond * time.Duration(conf.SyncTimeout),
+		Transport: transport,
 	}
 
 	agolloClient := &client{
@@ -104,7 +105,7 @@ func NewClient(conf *Conf, opts ...ClientOption) Client {
 		)
 	}
 
-	agolloClient.longPoller = newLongPoller(conf, longPollInterval, agolloClient.handleNamespaceUpdate)
+	agolloClient.longPoller = newLongPoller(conf, longPollInterval, agolloClient.handleNamespaceUpdate, transport)
 	agolloClient.ctx, agolloClient.cancel = context.WithCancel(context.Background())
 
 	for _, opt := range opts {
