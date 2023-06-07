@@ -16,6 +16,8 @@ import (
 	"github.com/philchia/agollo/v4/internal/properties"
 )
 
+var defaultTransport *http.Transport
+
 type Client interface {
 	// Start fetch all config to local cache and run period poll to keep update to remote server
 	Start() error
@@ -78,14 +80,22 @@ type result struct {
 	ReleaseKey     string            `json:"releaseKey"`
 }
 
+func getDefaultTransport(insecureSkipVerify bool) *http.Transport {
+	if defaultTransport != nil {
+		return defaultTransport
+	}
+	defaultTransport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+	}
+	return defaultTransport
+}
+
 // NewClient create client from conf
 func NewClient(conf *Conf, opts ...ClientOption) Client {
 	conf.normalize()
 	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.InsecureSkipVerify},
-		},
-		Timeout: time.Millisecond * time.Duration(conf.SyncTimeout),
+		Timeout:   time.Millisecond * time.Duration(conf.SyncTimeout),
+		Transport: getDefaultTransport(conf.InsecureSkipVerify),
 	}
 
 	agolloClient := &client{
