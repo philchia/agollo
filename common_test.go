@@ -31,7 +31,7 @@ func TestConfigURL(t *testing.T) {
 			MetaAddr: "127.0.0.1:8080",
 			AppID:    "SampleApp",
 			Cluster:  "default",
-		}, "application", "")
+		}, "application", -1)
 	_, err := url.Parse(target)
 	if err != nil {
 		t.Error(err)

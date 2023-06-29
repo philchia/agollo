@@ -1,11 +1,16 @@
 package agollo
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
 	"strings"
 )
+
+type messages struct {
+	Details map[string]interface{} `json:"details,omitempty"`
+}
 
 func getLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
@@ -48,15 +53,30 @@ func notificationURL(conf *Conf, notifications string) string {
 		url.QueryEscape(notifications))
 }
 
-func configURL(conf *Conf, namespace, releaseKey string) string {
+func configURL(conf *Conf, namespace string, notificationId int) string {
 	var addr = conf.MetaAddr
-	return fmt.Sprintf("%s/configs/%s/%s/%s?releaseKey=%s&ip=%s",
+	message := getMessages(conf, namespace, notificationId)
+	return fmt.Sprintf("%s/configs/%s/%s/%s?releaseKey=&ip=%s&messages=%s",
 		httpurl(addr),
 		url.QueryEscape(conf.AppID),
 		url.QueryEscape(conf.Cluster),
 		url.QueryEscape(nomalizeNamespace(namespace)),
-		releaseKey,
-		getLocalIP())
+		getLocalIP(),
+		url.QueryEscape(message))
+}
+
+func getMessages(conf *Conf, namespace string, notificationId int) string {
+	key := fmt.Sprintf("%s+%s+%s", conf.AppID, conf.Cluster, nomalizeNamespace(namespace))
+	d := make(map[string]interface{})
+	d[key] = notificationId
+	m := &messages{}
+	m.Details = d
+	message, err := json.Marshal(m)
+	if err != nil {
+		fmt.Println("get messaget err:", err)
+		return ""
+	}
+	return string(message)
 }
 
 func strIn(slice []string, target string) bool {
