@@ -25,7 +25,7 @@ type poller interface {
 }
 
 // notificationHandler handle namespace update notification
-type notificationHandler func(namespace string) error
+type notificationHandler func(namespace string, notificationId int) error
 
 // longPoller implement poller interface
 type longPoller struct {
@@ -141,7 +141,7 @@ func (p *longPoller) pumpUpdates() error {
 	}
 
 	for _, update := range updates {
-		if err := p.handler(update.NamespaceName); err != nil {
+		if err := p.handler(update.NamespaceName, update.NotificationID); err != nil {
 			ret = err
 			continue
 		}

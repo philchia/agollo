@@ -137,9 +137,9 @@ func (c *client) Start() error {
 }
 
 // handleNamespaceUpdate sync config for namespace, delivery changes to subscriber
-func (c *client) handleNamespaceUpdate(namespace string) error {
+func (c *client) handleNamespaceUpdate(namespace string, notificationId int) error {
 	c.logger.Infof("handle namespace %s update", namespace)
-	change, err := c.sync(namespace)
+	change, err := c.sync(namespace, notificationId)
 	if err != nil || change == nil {
 		return err
 	}
@@ -272,9 +272,9 @@ func (c *client) GetAllKeys(opts ...OpOption) []string {
 }
 
 // sync namespace config
-func (c *client) sync(namespace string) (*ChangeEvent, error) {
+func (c *client) sync(namespace string, notificationId int) (*ChangeEvent, error) {
 	c.logger.Infof("sync namespace %s with remote config server", namespace)
-	url := configURL(c.conf, namespace, "")
+	url := configURL(c.conf, namespace, notificationId)
 	bts, err := c.requester.request(url)
 	if err != nil || len(bts) == 0 {
 		return nil, err
