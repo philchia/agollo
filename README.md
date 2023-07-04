@@ -1,4 +1,4 @@
-# agollo is a golang client for apollo 🚀 [![CircleCI](https://circleci.com/gh/philchia/agollo/tree/v4.svg?style=svg)](https://circleci.com/gh/philchia/agollo/tree/master)
+# agollo is a golang client for apollo 🚀 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/philchia/agollo)](https://goreportcard.com/report/github.com/philchia/agollo)
 [![codebeat badge](https://codebeat.co/badges/e31b4a09-f531-4b74-a86a-775f46436539)](https://codebeat.co/projects/github-com-philchia-agollo-master)
@@ -33,12 +33,12 @@ go get -u github.com/philchia/agollo/v4
 ## Usage
 
 ### Import agollo
+
 ```golang
 import "github.com/philchia/agollo/v4"
 ```
 
 ### In order to use agollo, issue a client or use the built-in default client
-
 
 #### to use the default global client
 
